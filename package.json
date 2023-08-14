@@ -1,0 +1,58 @@
+{
+  "name": "ebin",
+  "version": "0.0.1",
+  "description": "Epic binary parser/serializer",
+  "type": "module",
+  "main": "lib/index.js",
+  "module": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "keywords": [
+    "binary",
+    "parser",
+    "serializer",
+    "library",
+    "typescript"
+  ],
+  "scripts": {
+    "prepare": "npm run build",
+    "test": "jest",
+    "build": "tsc",
+    "lint": "eslint src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mat-sz/ebin.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mat-sz/ebin/issues"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
+      "prettier --write"
+    ],
+    "__tests__/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
+      "prettier --write"
+    ]
+  },
+  "homepage": "https://github.com/mat-sz/ebin",
+  "author": "Mat Sz <contact@matsz.dev>",
+  "license": "BSD-3-Clause-Clear",
+  "private": false,
+  "devDependencies": {
+    "@types/jest": "^29.5.3",
+    "@typescript-eslint/eslint-plugin": "^6.2.1",
+    "@typescript-eslint/parser": "^6.2.1",
+    "eslint": "^8.46.0",
+    "husky": "^8.0.3",
+    "jest": "^29.6.2",
+    "lint-staged": "^13.2.3",
+    "prettier": "^3.0.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.1.6"
+  }
+}
