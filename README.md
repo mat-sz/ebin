@@ -13,6 +13,14 @@
 </a>
 </p>
 
+Inspired by [superstruct](https://github.com/ianstormtaylor/superstruct).
+
+This library can work thanks to the fact that JavaScript stores the definition order for `string` object property keys:
+
+- https://262.ecma-international.org/6.0/#sec-ordinary-object-internal-methods-and-internal-slots-ownpropertykeys
+
+The order is guaranteed since ES2015.
+
 ## Example usage
 
 ```ts

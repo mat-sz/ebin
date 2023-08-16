@@ -41,7 +41,7 @@ export class StructSchema<
   constructor(fields: TSchema) {
     super();
 
-    for (const key of Object.keys(fields)) {
+    for (const key of Object.getOwnPropertyNames(fields)) {
       this._schema.push({ type: 'field', key, schema: fields[key] });
     }
   }
