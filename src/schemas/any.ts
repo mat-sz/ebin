@@ -1,6 +1,7 @@
 import { BaseSchema, BaseReader, BaseWriter } from '../types.js';
 
 export class AnySchema<T = any> implements BaseSchema<T> {
+  primitiveType: string | undefined = undefined;
   byteLength = 0;
   readonly TYPE!: T;
 

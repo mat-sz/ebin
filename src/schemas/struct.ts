@@ -2,14 +2,29 @@ import { ArrayBufferReader } from '../io/arrayBuffer/reader.js';
 import { ArrayBufferWriter } from '../io/arrayBuffer/writer.js';
 import {
   BaseReader,
+  BaseSchema,
   BaseWriter,
+  Infer,
+  InferSchema,
   KeysMatching,
   ObjectSchema,
   ObjectType,
   TypedArray,
 } from '../types.js';
-import { DynamicLengthSchema } from './any.js';
+import { AnySchema, DynamicLengthSchema } from './any.js';
 import type { NumberSchema } from './numeric.js';
+
+interface FieldSchema<TObject> {
+  type: 'field';
+  key: keyof TObject;
+  schema: BaseSchema;
+  condition?: (obj: TObject) => boolean;
+}
+interface ChildSchema<TObject> {
+  type: 'child';
+  schema: StructSchema<any>;
+  condition?: (obj: TObject) => boolean;
+}
 
 export class StructSchema<
   TSchema extends ObjectSchema,
@@ -21,37 +36,57 @@ export class StructSchema<
   private _lengthOverride: { [K in keyof TObject]?: keyof TObject } = {};
 
   private _littleEndian = false;
+  private _schema: (FieldSchema<TObject> | ChildSchema<TObject>)[] = [];
 
-  constructor(private fields: TSchema) {
+  constructor(fields: TSchema) {
     super();
+
+    for (const key of Object.keys(fields)) {
+      this._schema.push({ type: 'field', key, schema: fields[key] });
+    }
   }
 
-  computeLength(value: TObject): number {
+  computeByteLength(value: TObject): number {
     let length = 0;
 
-    const keys = Object.keys(this.fields) as (keyof TSchema)[];
-    for (const key of keys) {
-      const schema = this.fields[key];
-      // TODO .getByteLength
-      length += schema.getByteLength(value[key]);
+    for (const field of this._schema) {
+      if (field.condition && !field.condition(value)) {
+        continue;
+      }
+
+      if (field.type === 'field') {
+        length += field.schema.getByteLength(value[field.key]);
+      } else {
+        length += field.schema.getByteLength(value);
+      }
     }
 
     return length;
   }
 
   read(reader: BaseReader): TObject {
-    const obj = {} as TObject;
+    let obj = {} as TObject;
 
-    const keys = Object.keys(this.fields) as (keyof TSchema)[];
-    for (const key of keys) {
-      const lengthField = this._lengthOverride[key];
-      const length = lengthField ? obj[lengthField] : undefined;
-
-      if (typeof length !== 'number' && typeof length !== 'undefined') {
-        throw new Error(`Invalid length override type ${typeof length}.`);
+    for (const field of this._schema) {
+      if (field.condition && !field.condition(obj)) {
+        continue;
       }
 
-      obj[key] = this.fields[key].read(reader, length);
+      if (field.type === 'field') {
+        const lengthField = this._lengthOverride[field.key];
+        const length = lengthField ? obj[lengthField] : undefined;
+
+        if (typeof length !== 'number' && typeof length !== 'undefined') {
+          throw new Error(`Invalid length override type ${typeof length}.`);
+        }
+
+        obj[field.key] = field.schema.read(reader, length);
+      } else {
+        obj = {
+          ...obj,
+          ...field.schema.read(reader),
+        };
+      }
     }
 
     for (const key of this._hiddenFields) {
@@ -62,22 +97,35 @@ export class StructSchema<
   }
 
   write(writer: BaseWriter, value: TObject): void {
-    const lengths: Record<string, number> = {};
+    const lengths: { [key in keyof TObject]?: number } = {};
     for (const key of Object.keys(this._lengthOverride)) {
       const lengthField = this._lengthOverride[key];
       if (!lengthField) {
         continue;
       }
 
-      const schema = this.fields[key];
+      const field = this._schema.find(
+        field => field.type === 'field' && field.key === key,
+      );
+      if (!field) {
+        continue;
+      }
 
-      const length = schema.getByteLength(value[key]);
+      const length = field.schema.getByteLength(value[key]);
       value[lengthField] = length as any;
-      lengths[key] = length;
+      lengths[key as keyof TObject] = length;
     }
 
-    for (const key of Object.keys(this.fields)) {
-      this.fields[key].write(writer, value[key], lengths[key]);
+    for (const field of this._schema) {
+      if (field.condition && !field.condition(value)) {
+        continue;
+      }
+
+      if (field.type === 'field') {
+        field.schema.write(writer, value[field.key], lengths[field.key]);
+      } else {
+        field.schema.write(writer, value);
+      }
     }
   }
 
@@ -88,8 +136,7 @@ export class StructSchema<
   }
 
   toByteArray(value: TObject): Uint8Array {
-    const length = this.computeLength(value);
-
+    const length = this.computeByteLength(value);
     const array = new Uint8Array(length);
     const writer = new ArrayBufferWriter(array.buffer);
     writer.littleEndian = this._littleEndian;
@@ -112,10 +159,10 @@ export class StructSchema<
     TDynamicField extends KeysMatching<TSchema, DynamicLengthSchema>,
     TLengthField extends KeysMatching<TSchema, NumberSchema<number>>,
   >(
-    stringField: TDynamicField,
+    dynamicField: TDynamicField,
     lengthField: TLengthField,
   ): StructSchema<Omit<TSchema, TLengthField>> {
-    this._lengthOverride[stringField] = lengthField;
+    this._lengthOverride[dynamicField] = lengthField;
     this._hiddenFields.push(lengthField);
 
     return this as any;
@@ -127,6 +174,43 @@ export class StructSchema<
 
   bigEndian() {
     this._littleEndian = false;
+  }
+
+  switch<
+    TSwitchField extends KeysMatching<TSchema, AnySchema<number | string>>,
+    TSwitchCases extends Record<TSwitchCaseKey, StructSchema<any, any>>,
+    TSwitchCaseKey extends Infer<TSchema[TSwitchField]>,
+    TSwitchSchema = {
+      [K in keyof TSwitchCases]: InferSchema<TSwitchCases[K]>;
+    }[keyof TSwitchCases],
+    TSwitchObject = {
+      [K in keyof TSwitchCases]: Omit<TObject, TSwitchField> &
+        Infer<TSwitchCases[K]> & {
+          [J in TSwitchField]: K;
+        };
+    }[keyof TSwitchCases],
+  >(
+    field: TSwitchField,
+    cases: TSwitchCases,
+  ): StructSchema<TSchema & TSwitchSchema, TObject | TSwitchObject> {
+    const switchField = this._schema.find(
+      f => f.type === 'field' && f.key === field,
+    );
+    if (!switchField) {
+      throw new Error('Switch field must exist.');
+    }
+
+    for (const key of Object.keys(cases)) {
+      const realKey =
+        switchField.schema.primitiveType === 'number' ? parseInt(key) : key;
+
+      this._schema.push({
+        type: 'child',
+        schema: cases[key as TSwitchCaseKey],
+        condition: obj => obj[field] === realKey,
+      });
+    }
+    return this as any;
   }
 }
 

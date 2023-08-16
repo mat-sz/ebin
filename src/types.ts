@@ -2,6 +2,7 @@ import type { StructSchema } from './schemas/struct.js';
 
 export interface BaseSchema<T = any> {
   readonly TYPE: T;
+  readonly primitiveType: string | undefined;
 
   getByteLength(value?: T): number;
 

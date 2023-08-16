@@ -17,6 +17,8 @@ class StringComputedSchema<TValue> extends ComputedSchema<string, TValue> {
 }
 
 export class StringSchema extends DynamicLengthSchema<string> {
+  primitiveType = 'string';
+
   computeByteLength(value: string): number {
     const encoder = new TextEncoder();
     return encoder.encode(value).byteLength;
@@ -57,7 +59,7 @@ export function string(): StringSchema {
   return new StringSchema();
 }
 
-export function json(): StringSchema {
+export function json<TJson>(): StringComputedSchema<TJson> {
   return new StringSchema().computed(
     value => JSON.parse(value),
     value => JSON.stringify(value),

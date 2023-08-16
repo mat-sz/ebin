@@ -44,3 +44,42 @@ describe('withLength', () => {
     });
   });
 });
+
+const testStructSwitch = struct({
+  test: uint16(),
+}).switch('test', {
+  0x01: struct({
+    hello: uint16(),
+  }),
+  0x02: struct({
+    world: uint32(),
+  }),
+});
+
+describe('switch', () => {
+  it('should serialize binary data', () => {
+    expect(testStructSwitch.toByteArray({ test: 1, hello: 2 })).toEqual(
+      new Uint8Array([0x00, 0x01, 0x00, 0x02]),
+    );
+    expect(testStructSwitch.toByteArray({ test: 2, world: 1 })).toEqual(
+      new Uint8Array([0x00, 0x02, 0x00, 0x00, 0x00, 0x01]),
+    );
+  });
+
+  it('should parse binary data', () => {
+    expect(
+      testStructSwitch.fromByteArray(new Uint8Array([0x00, 0x01, 0x00, 0x02])),
+    ).toEqual({
+      test: 1,
+      hello: 2,
+    });
+    expect(
+      testStructSwitch.fromByteArray(
+        new Uint8Array([0x00, 0x02, 0x00, 0x00, 0x00, 0x01]),
+      ),
+    ).toEqual({
+      test: 2,
+      world: 1,
+    });
+  });
+});

@@ -3,6 +3,7 @@ import { AnySchema } from './any.js';
 
 export class NumberSchema<T extends bigint | number> extends AnySchema<T> {
   protected _littleEndian: boolean | undefined = undefined;
+  primitiveType = 'number';
 
   constructor(public byteLength: 1 | 2 | 4 | 8) {
     super();
@@ -33,6 +34,8 @@ class IntField extends NumberSchema<number> {
 }
 
 class BigIntField extends NumberSchema<bigint> {
+  primitiveType = 'bigint';
+
   constructor() {
     super(8);
   }
@@ -62,6 +65,8 @@ class UintField extends NumberSchema<number> {
 }
 
 class BigUintField extends NumberSchema<bigint> {
+  primitiveType = 'bigint';
+
   constructor() {
     super(8);
   }
