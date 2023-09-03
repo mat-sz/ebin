@@ -18,6 +18,10 @@ export class AnySchema<T = any> implements BaseSchema<T> {
   write(writer: BaseWriter, value: T): void {
     throw new Error('Not implemented');
   }
+
+  clone(): this {
+    throw new Error('Not implemented');
+  }
 }
 
 export class DynamicLengthSchema<T = any> extends AnySchema<T> {

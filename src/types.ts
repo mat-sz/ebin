@@ -8,6 +8,7 @@ export interface BaseSchema<T = any> {
 
   read(reader: BaseReader, length?: number): T;
   write(writer: BaseWriter, value: T, length?: number): void;
+  clone(): this;
 }
 
 export interface BaseReader {
