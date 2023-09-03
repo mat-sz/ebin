@@ -130,8 +130,13 @@ export class StructSchema<
   }
 
   fromByteArray(array: TypedArray): TObject {
-    const reader = new ArrayBufferReader(array.buffer);
-    reader.littleEndian = this._littleEndian;
+    // A new Uint8Array is needed here to make node.js Buffers work without issues.
+    const reader = new ArrayBufferReader(new Uint8Array(array).buffer);
+
+    if (typeof this._littleEndian !== 'undefined') {
+      reader.littleEndian = this._littleEndian;
+    }
+
     return this.read(reader);
   }
 
@@ -139,16 +144,18 @@ export class StructSchema<
     const length = this.computeByteLength(value);
     const array = new Uint8Array(length);
     const writer = new ArrayBufferWriter(array.buffer);
-    writer.littleEndian = this._littleEndian;
+
+    if (typeof this._littleEndian !== 'undefined') {
+      writer.littleEndian = this._littleEndian;
+    }
+
     this.write(writer, value);
 
     return array;
   }
 
   fromArrayBuffer(buffer: ArrayBuffer): TObject {
-    const reader = new ArrayBufferReader(buffer);
-    reader.littleEndian = this._littleEndian;
-    return this.read(reader);
+    return this.fromByteArray(new Uint8Array(buffer));
   }
 
   toArrayBuffer(value: TObject): ArrayBuffer {
@@ -168,12 +175,16 @@ export class StructSchema<
     return this as any;
   }
 
-  littleEndian() {
+  littleEndian(): this {
     this._littleEndian = true;
+
+    return this as any;
   }
 
-  bigEndian() {
+  bigEndian(): this {
     this._littleEndian = false;
+
+    return this as any;
   }
 
   switch<
