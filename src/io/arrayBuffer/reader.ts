@@ -2,11 +2,45 @@ import { BaseReader } from '../../types.js';
 
 export class ArrayBufferReader implements BaseReader {
   offset = 0;
+  bitOffset = 0;
   dataView: DataView;
   littleEndian = false;
 
+  private bitsLastByte = 0;
+  private bitsLastOffset = -1;
+
   constructor(private arrayBuffer: ArrayBuffer) {
     this.dataView = new DataView(arrayBuffer);
+  }
+
+  readBits(count: number): number {
+    let output = 0;
+
+    for (let i = 0; i < count; i++) {
+      if (this.readBit()) {
+        output |= 1 << (count - 1 - i);
+      }
+    }
+
+    return output;
+  }
+
+  readBit(): number {
+    if (this.bitsLastOffset !== this.offset) {
+      this.bitsLastOffset = this.offset;
+      this.bitsLastByte = this.dataView.getUint8(this.offset);
+    }
+
+    const bit = +!!(this.bitsLastByte & (1 << (7 - this.bitOffset)));
+
+    if (this.bitOffset === 7) {
+      this.bitOffset = 0;
+      this.offset++;
+    } else {
+      this.bitOffset++;
+    }
+
+    return bit;
   }
 
   readInt(byteLength: 8, littleEndian?: boolean): bigint;
@@ -40,6 +74,8 @@ export class ArrayBufferReader implements BaseReader {
     byteLength: 1 | 2 | 4 | 8,
     littleEndian = this.littleEndian,
   ): number | bigint {
+    this.bitOffset = 0;
+
     try {
       switch (byteLength) {
         case 1:
@@ -60,6 +96,8 @@ export class ArrayBufferReader implements BaseReader {
   }
 
   readFloat(byteLength: 4 | 8, littleEndian = this.littleEndian): number {
+    this.bitOffset = 0;
+
     try {
       switch (byteLength) {
         case 4:
@@ -75,12 +113,16 @@ export class ArrayBufferReader implements BaseReader {
   }
 
   readString(byteLength: number): string {
+    this.bitOffset = 0;
+
     const buffer = this.readBytes(byteLength);
     const decoder = new TextDecoder();
     return decoder.decode(buffer);
   }
 
   readBytes(byteLength: number): ArrayBuffer {
+    this.bitOffset = 0;
+
     try {
       return this.arrayBuffer.slice(this.offset, this.offset + byteLength);
     } finally {

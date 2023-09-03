@@ -12,6 +12,9 @@ export interface BaseSchema<T = any> {
 }
 
 export interface BaseReader {
+  readBit(): number;
+  readBits(count: number): number;
+
   readInt(byteLength: 8, littleEndian?: boolean): bigint;
   readInt(byteLength: 1 | 2 | 4, littleEndian?: boolean): number;
 
@@ -24,6 +27,9 @@ export interface BaseReader {
 }
 
 export interface BaseWriter {
+  writeBit(value: number): void;
+  writeBits(count: number, value: number): void;
+
   writeInt(byteLength: 8, value: bigint, littleEndian?: boolean): void;
   writeInt(byteLength: 1 | 2 | 4, value: number, littleEndian?: boolean): void;
 

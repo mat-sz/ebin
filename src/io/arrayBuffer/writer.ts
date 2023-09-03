@@ -2,11 +2,40 @@ import { BaseWriter } from '../../types.js';
 
 export class ArrayBufferWriter implements BaseWriter {
   offset = 0;
+  bitOffset = 0;
   dataView: DataView;
   littleEndian = false;
 
+  private bitsLastByte = 0;
+  private bitsLastOffset = -1;
+
   constructor(private arrayBuffer: ArrayBuffer) {
     this.dataView = new DataView(arrayBuffer);
+  }
+
+  writeBits(count: number, value: number): void {
+    for (let i = 0; i < count; i++) {
+      this.writeBit(+!!(value & (1 << (count - 1 - i))));
+    }
+  }
+
+  writeBit(value: number): void {
+    if (this.bitsLastOffset !== this.offset) {
+      this.bitsLastOffset = this.offset;
+      this.bitsLastByte = 0;
+    }
+
+    if (value) {
+      this.bitsLastByte |= 1 << (7 - this.bitOffset);
+    }
+
+    if (this.bitOffset === 7) {
+      this.dataView.setUint8(this.offset, this.bitsLastByte);
+      this.bitOffset = 0;
+      this.offset++;
+    } else {
+      this.bitOffset++;
+    }
   }
 
   writeInt(byteLength: 8, value: bigint, littleEndian?: boolean): void;
