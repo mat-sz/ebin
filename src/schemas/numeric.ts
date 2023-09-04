@@ -18,7 +18,7 @@ export class NumberSchema<T extends bigint | number> extends AnySchema<T> {
   }
 }
 
-class IntField extends NumberSchema<number> {
+class IntSchema extends NumberSchema<number> {
   constructor(public byteLength: 1 | 2 | 4) {
     // TODO: Check byte length
     super(byteLength);
@@ -33,7 +33,7 @@ class IntField extends NumberSchema<number> {
   }
 }
 
-class BigIntField extends NumberSchema<bigint> {
+class BigIntSchema extends NumberSchema<bigint> {
   primitiveType = 'bigint';
 
   constructor() {
@@ -49,7 +49,7 @@ class BigIntField extends NumberSchema<bigint> {
   }
 }
 
-class UintField extends NumberSchema<number> {
+class UintSchema extends NumberSchema<number> {
   constructor(public byteLength: 1 | 2 | 4) {
     // TODO: Check byte length
     super(byteLength);
@@ -64,7 +64,7 @@ class UintField extends NumberSchema<number> {
   }
 }
 
-class BigUintField extends NumberSchema<bigint> {
+class BigUintSchema extends NumberSchema<bigint> {
   primitiveType = 'bigint';
 
   constructor() {
@@ -80,7 +80,7 @@ class BigUintField extends NumberSchema<bigint> {
   }
 }
 
-class FloatField extends NumberSchema<number> {
+class FloatSchema extends NumberSchema<number> {
   constructor(public byteLength: 4 | 8) {
     // TODO: Check byte length
     super(byteLength);
@@ -95,42 +95,42 @@ class FloatField extends NumberSchema<number> {
   }
 }
 
-export function uint8(): UintField {
-  return new UintField(1);
+export function uint8(): UintSchema {
+  return new UintSchema(1);
 }
 
-export function uint16(): UintField {
-  return new UintField(2);
+export function uint16(): UintSchema {
+  return new UintSchema(2);
 }
 
-export function uint32(): UintField {
-  return new UintField(4);
+export function uint32(): UintSchema {
+  return new UintSchema(4);
 }
 
-export function uint64(): BigUintField {
-  return new BigUintField();
+export function uint64(): BigUintSchema {
+  return new BigUintSchema();
 }
 
-export function int8(): IntField {
-  return new IntField(1);
+export function int8(): IntSchema {
+  return new IntSchema(1);
 }
 
-export function int16(): IntField {
-  return new IntField(2);
+export function int16(): IntSchema {
+  return new IntSchema(2);
 }
 
-export function int32(): IntField {
-  return new IntField(4);
+export function int32(): IntSchema {
+  return new IntSchema(4);
 }
 
-export function int64(): BigIntField {
-  return new BigIntField();
+export function int64(): BigIntSchema {
+  return new BigIntSchema();
 }
 
-export function float(): FloatField {
-  return new FloatField(4);
+export function float(): FloatSchema {
+  return new FloatSchema(4);
 }
 
-export function double(): FloatField {
-  return new FloatField(8);
+export function double(): FloatSchema {
+  return new FloatSchema(8);
 }
