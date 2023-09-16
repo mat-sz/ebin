@@ -12,6 +12,8 @@ export interface BaseSchema<T = any> {
 }
 
 export interface BaseReader {
+  readonly currentOffset: number;
+
   readBit(): number;
   readBits(count: number): number;
 
@@ -27,6 +29,8 @@ export interface BaseReader {
 }
 
 export interface BaseWriter {
+  readonly currentOffset: number;
+
   writeBit(value: number): void;
   writeBits(count: number, value: number): void;
 

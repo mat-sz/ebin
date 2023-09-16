@@ -13,6 +13,10 @@ export class ArrayBufferReader implements BaseReader {
     this.dataView = new DataView(arrayBuffer);
   }
 
+  get currentOffset() {
+    return this.offset + this.bitOffset / 8;
+  }
+
   readBits(count: number): number {
     let output = 0;
 

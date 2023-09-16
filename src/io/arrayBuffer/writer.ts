@@ -13,6 +13,10 @@ export class ArrayBufferWriter implements BaseWriter {
     this.dataView = new DataView(arrayBuffer);
   }
 
+  get currentOffset() {
+    return this.offset + this.bitOffset / 8;
+  }
+
   writeBits(count: number, value: number): void {
     for (let i = 0; i < count; i++) {
       this.writeBit(+!!(value & (1 << (count - 1 - i))));
