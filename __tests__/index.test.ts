@@ -27,9 +27,9 @@ describe('struct', () => {
 const testStructStr = struct({
   test: uint16(),
   str: string(),
-}).withLength('str', 'test');
+}).withByteLength('str', 'test');
 
-describe('withLength', () => {
+describe('withByteLength', () => {
   it('should serialize binary data', () => {
     expect(testStructStr.toByteArray({ str: 'abc' })).toEqual(
       new Uint8Array([0, 3, 97, 98, 99]),

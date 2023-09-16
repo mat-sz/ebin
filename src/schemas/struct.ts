@@ -162,7 +162,7 @@ export class StructSchema<
     return this.toByteArray(value).buffer;
   }
 
-  withLength<
+  withByteLength<
     TDynamicField extends KeysMatching<TSchema, DynamicLengthSchema>,
     TLengthField extends KeysMatching<TSchema, NumberSchema<number>>,
   >(
