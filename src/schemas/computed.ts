@@ -12,7 +12,7 @@ export class ComputedSchema<TInput, TValue> extends DynamicLengthSchema {
     parse: (value: TValue) => TComputed,
     serialize: (value: TComputed) => TValue,
   ): ComputedSchema<TInput, TComputed> {
-    const newSchema = this as any as ComputedSchema<TInput, TComputed>;
+    const newSchema = this as unknown as ComputedSchema<TInput, TComputed>;
     newSchema.parse = value => parse(this.parse(value));
     newSchema.serialize = value => this.serialize(serialize(value));
     return newSchema;

@@ -178,13 +178,13 @@ export class StructSchema<
   littleEndian(): this {
     this._littleEndian = true;
 
-    return this as any;
+    return this;
   }
 
   bigEndian(): this {
     this._littleEndian = false;
 
-    return this as any;
+    return this;
   }
 
   switch<
