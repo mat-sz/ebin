@@ -10,6 +10,7 @@ export {
   float,
   double,
 } from './numeric.js';
+export { array } from './array.js';
 export { bit } from './bit.js';
 export { bits } from './bits.js';
 export { arrayBuffer, uint8Array } from './bytes.js';

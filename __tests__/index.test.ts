@@ -1,4 +1,4 @@
-import { struct, uint16, uint32, string } from '../src';
+import { struct, uint16, uint32, string, array } from '../src';
 
 const testStruct = struct({
   test1: uint16(),
@@ -80,6 +80,27 @@ describe('switch', () => {
     ).toEqual({
       test: 2,
       world: 1,
+    });
+  });
+});
+
+const testStructArray = struct({
+  test: uint16(),
+  array: array(uint16()),
+}).withByteLength('array', 'test');
+
+describe('array', () => {
+  it('should serialize binary data', () => {
+    expect(testStructArray.toByteArray({ array: [1, 2, 3] })).toEqual(
+      new Uint8Array([0, 6, 0, 1, 0, 2, 0, 3]),
+    );
+  });
+
+  it('should parse binary data', () => {
+    expect(
+      testStructArray.fromByteArray(new Uint8Array([0, 6, 0, 1, 0, 2, 0, 3])),
+    ).toEqual({
+      array: [1, 2, 3],
     });
   });
 });
