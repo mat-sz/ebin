@@ -53,17 +53,17 @@ export class ArrayBufferWriter implements BaseWriter {
     try {
       switch (byteLength) {
         case 1:
-          this.dataView.setInt8(this.offset, value as number);
+          this.dataView.setInt8(this.offset, Number(value));
           break;
         case 2:
-          this.dataView.setInt16(this.offset, value as number, littleEndian);
+          this.dataView.setInt16(this.offset, Number(value), littleEndian);
           break;
         case 4:
-          this.dataView.setInt32(this.offset, value as number, littleEndian);
+          this.dataView.setInt32(this.offset, Number(value), littleEndian);
           break;
         case 8:
           // TODO: Fallback for browsers that don't support this.
-          this.dataView.setBigInt64(this.offset, value as bigint, littleEndian);
+          this.dataView.setBigInt64(this.offset, BigInt(value), littleEndian);
           break;
         default:
           throw new Error(`Invalid byteLength = ${byteLength}`);
@@ -83,21 +83,17 @@ export class ArrayBufferWriter implements BaseWriter {
     try {
       switch (byteLength) {
         case 1:
-          this.dataView.setUint8(this.offset, value as number);
+          this.dataView.setUint8(this.offset, Number(value));
           break;
         case 2:
-          this.dataView.setUint16(this.offset, value as number, littleEndian);
+          this.dataView.setUint16(this.offset, Number(value), littleEndian);
           break;
         case 4:
-          this.dataView.setUint32(this.offset, value as number, littleEndian);
+          this.dataView.setUint32(this.offset, Number(value), littleEndian);
           break;
         case 8:
           // TODO: Fallback for browsers that don't support this.
-          this.dataView.setBigUint64(
-            this.offset,
-            value as bigint,
-            littleEndian,
-          );
+          this.dataView.setBigUint64(this.offset, BigInt(value), littleEndian);
           break;
         default:
           throw new Error(`Invalid byteLength = ${byteLength}`);
@@ -118,10 +114,10 @@ export class ArrayBufferWriter implements BaseWriter {
           this.dataView.setUint16(this.offset, toFloat16(value), littleEndian);
           break;
         case 4:
-          this.dataView.setFloat32(this.offset, value as number, littleEndian);
+          this.dataView.setFloat32(this.offset, value, littleEndian);
           break;
         case 8:
-          this.dataView.setFloat64(this.offset, value as number, littleEndian);
+          this.dataView.setFloat64(this.offset, value, littleEndian);
           break;
         default:
           throw new Error(`Invalid byteLength = ${byteLength}`);
