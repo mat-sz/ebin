@@ -131,10 +131,10 @@ export function float16(): FloatSchema {
   return new FloatSchema(2);
 }
 
-export function float(): FloatSchema {
+export function float32(): FloatSchema {
   return new FloatSchema(4);
 }
 
-export function double(): FloatSchema {
+export function float64(): FloatSchema {
   return new FloatSchema(8);
 }

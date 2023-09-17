@@ -7,8 +7,9 @@ export {
   uint16,
   uint32,
   uint64,
-  float,
-  double,
+  float16,
+  float32,
+  float64,
 } from './numeric.js';
 export { array } from './array.js';
 export { bit } from './bit.js';
