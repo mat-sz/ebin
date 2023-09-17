@@ -1,3 +1,4 @@
+import { toFloat16 } from '../../helpers/float16.js';
 import { BaseWriter } from '../../types.js';
 
 export class ArrayBufferWriter implements BaseWriter {
@@ -107,12 +108,15 @@ export class ArrayBufferWriter implements BaseWriter {
   }
 
   writeFloat(
-    byteLength: 4 | 8,
+    byteLength: 2 | 4 | 8,
     value: number,
     littleEndian = this.littleEndian,
   ): void {
     try {
       switch (byteLength) {
+        case 2:
+          this.dataView.setUint16(this.offset, toFloat16(value), littleEndian);
+          break;
         case 4:
           this.dataView.setFloat32(this.offset, value as number, littleEndian);
           break;

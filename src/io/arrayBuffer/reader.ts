@@ -1,3 +1,4 @@
+import { fromFloat16 } from '../../helpers/float16.js';
 import { BaseReader } from '../../types.js';
 
 export class ArrayBufferReader implements BaseReader {
@@ -99,11 +100,15 @@ export class ArrayBufferReader implements BaseReader {
     }
   }
 
-  readFloat(byteLength: 4 | 8, littleEndian = this.littleEndian): number {
+  readFloat(byteLength: 2 | 4 | 8, littleEndian = this.littleEndian): number {
     this.bitOffset = 0;
 
     try {
       switch (byteLength) {
+        case 2:
+          return fromFloat16(
+            this.dataView.getUint16(this.offset, littleEndian),
+          );
         case 4:
           return this.dataView.getFloat32(this.offset, littleEndian);
         case 8:

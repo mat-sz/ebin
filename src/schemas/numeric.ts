@@ -81,7 +81,7 @@ class BigUintSchema extends NumberSchema<bigint> {
 }
 
 class FloatSchema extends NumberSchema<number> {
-  constructor(public byteLength: 4 | 8) {
+  constructor(public byteLength: 2 | 4 | 8) {
     // TODO: Check byte length
     super(byteLength);
   }
@@ -125,6 +125,10 @@ export function int32(): IntSchema {
 
 export function int64(): BigIntSchema {
   return new BigIntSchema();
+}
+
+export function float16(): FloatSchema {
+  return new FloatSchema(2);
 }
 
 export function float(): FloatSchema {

@@ -23,7 +23,7 @@ export interface BaseReader {
   readUint(byteLength: 8, littleEndian?: boolean): bigint;
   readUint(byteLength: 1 | 2 | 4, littleEndian?: boolean): number;
 
-  readFloat(byteLength: 4 | 8, littleEndian?: boolean): number;
+  readFloat(byteLength: 2 | 4 | 8, littleEndian?: boolean): number;
 
   readBytes(byteLength: number): ArrayBuffer;
 }
@@ -40,7 +40,11 @@ export interface BaseWriter {
   writeUint(byteLength: 8, value: bigint, littleEndian?: boolean): void;
   writeUint(byteLength: 1 | 2 | 4, value: number, littleEndian?: boolean): void;
 
-  writeFloat(byteLength: 4 | 8, value: number, littleEndian?: boolean): void;
+  writeFloat(
+    byteLength: 2 | 4 | 8,
+    value: number,
+    littleEndian?: boolean,
+  ): void;
 
   writeBytes(bytes: ArrayBuffer): void;
 }
