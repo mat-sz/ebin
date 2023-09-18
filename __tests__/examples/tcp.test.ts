@@ -1,4 +1,4 @@
-import { tcpHeader } from '../examples/tcp';
+import { tcpHeader } from '../../examples/tcp';
 
 describe('tcp header', () => {
   it('should parse a valid TCP header', () => {
