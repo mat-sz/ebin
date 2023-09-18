@@ -1,0 +1,17 @@
+{
+  "name": "ebin-benchmark",
+  "private": true,
+  "type": "module",
+  "version": "0.0.0",
+  "scripts": {
+    "test": "vitest bench -t index.bench.ts"
+  },
+  "devDependencies": {
+    "binary-parser": "^2.2.1",
+    "binparse": "^2.1.0",
+    "destruct-js": "^0.2.13",
+    "structron": "^0.4.3",
+    "typescript": "^5.2.2",
+    "vitest": "^0.34.4"
+  }
+}
