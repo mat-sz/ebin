@@ -15,5 +15,6 @@ export { array } from './array.js';
 export { bit } from './bit.js';
 export { bits } from './bits.js';
 export { arrayBuffer, uint8Array } from './bytes.js';
+export { char } from './char.js';
 export { struct } from './struct.js';
 export { string } from './string.js';
