@@ -65,12 +65,20 @@ export class StructSchema<
   }
 
   read(reader: BaseReader): TObject {
-    let obj = {} as TObject;
+    if (typeof this._littleEndian !== 'undefined') {
+      reader.littleEndian = this._littleEndian;
+    }
 
+    const littleEndian = reader.littleEndian;
+
+    let obj = {} as TObject;
     for (const field of this._schema) {
       if (field.condition && !field.condition(obj)) {
         continue;
       }
+
+      // Since child structs can override that, we need to make sure to reset it back.
+      reader.littleEndian = littleEndian;
 
       if (field.type === 'field') {
         const lengthField = this._lengthOverride[field.key];
@@ -97,6 +105,12 @@ export class StructSchema<
   }
 
   write(writer: BaseWriter, value: TObject): void {
+    if (typeof this._littleEndian !== 'undefined') {
+      writer.littleEndian = this._littleEndian;
+    }
+
+    const littleEndian = writer.littleEndian;
+
     const lengths: { [key in keyof TObject]?: number } = {};
     for (const key of Object.keys(this._lengthOverride)) {
       const lengthField = this._lengthOverride[key];
@@ -121,6 +135,9 @@ export class StructSchema<
         continue;
       }
 
+      // Since child structs can override that, we need to make sure to reset it back.
+      writer.littleEndian = littleEndian;
+
       if (field.type === 'field') {
         field.schema.write(writer, value[field.key], lengths[field.key]);
       } else {
@@ -132,11 +149,6 @@ export class StructSchema<
   fromByteArray(array: TypedArray): TObject {
     // A new Uint8Array is needed here to make node.js Buffers work without issues.
     const reader = new ArrayBufferReader(new Uint8Array(array).buffer);
-
-    if (typeof this._littleEndian !== 'undefined') {
-      reader.littleEndian = this._littleEndian;
-    }
-
     return this.read(reader);
   }
 
@@ -145,12 +157,7 @@ export class StructSchema<
     const array = new Uint8Array(length);
     const writer = new ArrayBufferWriter(array.buffer);
 
-    if (typeof this._littleEndian !== 'undefined') {
-      writer.littleEndian = this._littleEndian;
-    }
-
     this.write(writer, value);
-
     return array;
   }
 
