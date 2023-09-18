@@ -9,6 +9,7 @@ import {
   KeysMatching,
   ObjectSchema,
   ObjectType,
+  ReadContext,
   TypedArray,
 } from '../types.js';
 import { AnySchema, DynamicLengthSchema } from './any.js';
@@ -33,7 +34,14 @@ export class StructSchema<
   readonly SCHEMA!: TSchema;
 
   private _hiddenFields: (keyof TSchema)[] = [];
-  private _lengthOverride: { [K in keyof TObject]?: keyof TObject } = {};
+
+  private _propertyWriteValueFn: {
+    [K in keyof TObject]?: (value: TObject) => keyof TObject;
+  } = {};
+
+  private _propertyReadContextFn: {
+    [K in keyof TObject]?: (value: TObject) => ReadContext;
+  } = {};
 
   private _littleEndian = false;
   private _schema: (FieldSchema<TObject> | ChildSchema<TObject>)[] = [];
@@ -72,6 +80,7 @@ export class StructSchema<
     const littleEndian = reader.littleEndian;
 
     let obj = {} as TObject;
+
     for (const field of this._schema) {
       if (field.condition && !field.condition(obj)) {
         continue;
@@ -81,14 +90,10 @@ export class StructSchema<
       reader.littleEndian = littleEndian;
 
       if (field.type === 'field') {
-        const lengthField = this._lengthOverride[field.key];
-        const length = lengthField ? obj[lengthField] : undefined;
-
-        if (typeof length !== 'number' && typeof length !== 'undefined') {
-          throw new Error(`Invalid length override type ${typeof length}.`);
-        }
-
-        obj[field.key] = field.schema.read(reader, length);
+        obj[field.key] = field.schema.read(
+          reader,
+          this._propertyReadContextFn[field.key]?.(obj),
+        );
       } else {
         obj = {
           ...obj,
@@ -111,23 +116,10 @@ export class StructSchema<
 
     const littleEndian = writer.littleEndian;
 
-    const lengths: { [key in keyof TObject]?: number } = {};
-    for (const key of Object.keys(this._lengthOverride)) {
-      const lengthField = this._lengthOverride[key];
-      if (!lengthField) {
-        continue;
-      }
-
-      const field = this._schema.find(
-        field => field.type === 'field' && field.key === key,
-      );
-      if (!field) {
-        continue;
-      }
-
-      const length = field.schema.getByteLength(value[key]);
-      value[lengthField] = length as any;
-      lengths[key as keyof TObject] = length;
+    for (const key of Object.keys(this._propertyWriteValueFn)) {
+      value[key as keyof TObject] = this._propertyWriteValueFn[key]!(
+        value,
+      ) as any;
     }
 
     for (const field of this._schema) {
@@ -139,7 +131,7 @@ export class StructSchema<
       writer.littleEndian = littleEndian;
 
       if (field.type === 'field') {
-        field.schema.write(writer, value[field.key], lengths[field.key]);
+        field.schema.write(writer, value[field.key]);
       } else {
         field.schema.write(writer, value);
       }
@@ -176,7 +168,46 @@ export class StructSchema<
     dynamicField: TDynamicField,
     lengthField: TLengthField,
   ): StructSchema<Omit<TSchema, TLengthField>> {
-    this._lengthOverride[dynamicField] = lengthField;
+    const dynamicSchema = this._schema.find(
+      schema => schema.type === 'field' && schema.key === dynamicField,
+    );
+    if (!dynamicSchema) {
+      throw new Error(
+        `Unable to set withByteLength on field '${String(dynamicField)}'`,
+      );
+    }
+
+    this._propertyWriteValueFn[lengthField] = value =>
+      dynamicSchema.schema.getByteLength(value[dynamicField]) as any;
+    this._propertyReadContextFn[dynamicField] = value => ({
+      byteLength: value[lengthField],
+    });
+    this._hiddenFields.push(lengthField);
+
+    return this as any;
+  }
+
+  withCount<
+    TDynamicField extends KeysMatching<TSchema, DynamicLengthSchema>,
+    TLengthField extends KeysMatching<TSchema, NumberSchema<number>>,
+  >(
+    dynamicField: TDynamicField,
+    lengthField: TLengthField,
+  ): StructSchema<Omit<TSchema, TLengthField>> {
+    const dynamicSchema = this._schema.find(
+      schema => schema.type === 'field' && schema.key === dynamicField,
+    );
+    if (!dynamicSchema) {
+      throw new Error(
+        `Unable to set withByteLength on field '${String(dynamicField)}'`,
+      );
+    }
+
+    this._propertyWriteValueFn[lengthField] = value =>
+      dynamicSchema.schema.getCount(value[dynamicField]) as any;
+    this._propertyReadContextFn[dynamicField] = value => ({
+      count: value[lengthField],
+    });
     this._hiddenFields.push(lengthField);
 
     return this as any;

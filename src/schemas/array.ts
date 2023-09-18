@@ -1,4 +1,10 @@
-import { BaseReader, BaseSchema, BaseWriter, Infer } from '../types.js';
+import {
+  BaseReader,
+  BaseSchema,
+  BaseWriter,
+  Infer,
+  ReadContext,
+} from '../types.js';
 import { DynamicLengthSchema } from './any.js';
 
 export class ArraySchema<
@@ -18,34 +24,38 @@ export class ArraySchema<
     );
   }
 
-  read(reader: BaseReader, length?: number): TValue[] {
-    if (typeof length === 'undefined') {
-      throw new Error('Invalid length');
+  getCount(value?: TValue[]): number {
+    return value?.length || 0;
+  }
+
+  read(reader: BaseReader, context?: ReadContext): TValue[] {
+    const byteLength = context?.byteLength;
+    const count = context?.count;
+
+    if (typeof byteLength === 'undefined' && typeof count === 'undefined') {
+      throw new Error('Either count or byteLength must be passed');
     }
 
     const items: TValue[] = [];
-    const startOffset = reader.currentOffset;
 
-    while (reader.currentOffset - startOffset < length) {
-      items.push(this.itemType.read(reader, length));
+    if (byteLength) {
+      const startOffset = reader.currentOffset;
+
+      while (reader.currentOffset - startOffset < byteLength) {
+        items.push(this.itemType.read(reader, context));
+      }
+    } else if (count) {
+      for (let i = 0; i < count; i++) {
+        items.push(this.itemType.read(reader));
+      }
     }
 
     return items;
   }
 
-  write(writer: BaseWriter, value: TValue[], length?: number): void {
-    const startOffset = writer.currentOffset;
+  write(writer: BaseWriter, value: TValue[]): void {
     for (const item of value) {
-      const itemLength =
-        typeof length === 'number'
-          ? writer.currentOffset + length - startOffset
-          : undefined;
-
-      if (typeof itemLength === 'number' && itemLength <= 0) {
-        throw new Error(`Supplied byteLength is less than array byteLength`);
-      }
-
-      this.itemType.write(writer, item, itemLength);
+      this.itemType.write(writer, item);
     }
   }
 }

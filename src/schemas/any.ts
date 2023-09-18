@@ -5,6 +5,10 @@ export class AnySchema<T = any> implements BaseSchema<T> {
   byteLength = 0;
   readonly TYPE!: T;
 
+  getCount(): number {
+    return 1;
+  }
+
   getByteLength(): number {
     return this.byteLength ?? 0;
   }
@@ -25,6 +29,11 @@ export class AnySchema<T = any> implements BaseSchema<T> {
 }
 
 export class DynamicLengthSchema<T = any> extends AnySchema<T> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getCount(value?: T): number {
+    return 1;
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   computeByteLength(value: T): number {
     return 0;

@@ -1,13 +1,19 @@
 import type { StructSchema } from './schemas/struct.js';
 
+export interface ReadContext {
+  byteLength?: number;
+  count?: number;
+}
+
 export interface BaseSchema<T = any> {
   readonly TYPE: T;
   readonly primitiveType: string | undefined;
 
   getByteLength(value?: T): number;
+  getCount(value?: T): number;
 
-  read(reader: BaseReader, length?: number): T;
-  write(writer: BaseWriter, value: T, length?: number): void;
+  read(reader: BaseReader, context?: ReadContext): T;
+  write(writer: BaseWriter, value: T): void;
   clone(): this;
 }
 
