@@ -1,4 +1,4 @@
-import { BaseReader, BaseWriter } from '../types.js';
+import { BaseReader, BaseWriter, ReadContext } from '../types.js';
 import { DynamicLengthSchema } from './any.js';
 import { ComputedSchema } from './computed.js';
 
@@ -24,26 +24,20 @@ export class StringSchema extends DynamicLengthSchema<string> {
     return encoder.encode(value).byteLength;
   }
 
-  read(reader: BaseReader, length?: number): string {
-    if (typeof length === 'undefined') {
-      throw new Error('Invalid length');
+  read(reader: BaseReader, context?: ReadContext): string {
+    const byteLength = context?.byteLength;
+    if (typeof byteLength !== 'number') {
+      throw new Error('Invalid byteLength');
     }
 
-    const buffer = reader.readBytes(length);
+    const buffer = reader.readBytes(byteLength);
     const decoder = new TextDecoder();
     return decoder.decode(buffer);
   }
 
-  write(writer: BaseWriter, value: string, length?: number): void {
+  write(writer: BaseWriter, value: string): void {
     const encoder = new TextEncoder();
     const bytes = encoder.encode(value);
-
-    if (typeof length === 'number' && length < bytes.byteLength) {
-      throw new Error(
-        `Supplied byteLength is less than string length: ${length} < ${bytes.byteLength}`,
-      );
-    }
-
     writer.writeBytes(bytes);
   }
 
