@@ -60,7 +60,7 @@ class UintSchema extends NumberSchema<number> {
   }
 
   write(writer: BaseWriter, value: number): void {
-    writer.writeInt(this.byteLength, value, this._littleEndian);
+    writer.writeUint(this.byteLength, value, this._littleEndian);
   }
 }
 
@@ -76,7 +76,7 @@ class BigUintSchema extends NumberSchema<bigint> {
   }
 
   write(writer: BaseWriter, value: bigint): void {
-    writer.writeInt(8, value, this._littleEndian);
+    writer.writeUint(8, value, this._littleEndian);
   }
 }
 
