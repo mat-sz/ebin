@@ -4,7 +4,7 @@
   "type": "module",
   "version": "0.0.0",
   "scripts": {
-    "test": "vitest bench -t index.bench.ts"
+    "test": "vitest bench -t '.*.bench.ts'"
   },
   "devDependencies": {
     "binary-parser": "^2.2.1",

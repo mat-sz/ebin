@@ -82,17 +82,30 @@ This section is updated manually and may not reflect the current performance.
 
 Last updated on: 2023-09-19
 
-Benchmarks are ran using vitest, and are defined in [benchmark/index.bench.ts](./benchmark/index.bench.ts).
+Benchmarks are ran using vitest.
 
 ### Parsing
 
+[benchmark/parse.bench.ts](./benchmark/parse.bench.ts)
+
 ```
- ✓ index.bench.ts (6) 3668ms
+ ✓ parse.bench.ts (6) 3677ms
      name                  hz     min     max    mean     p75     p99    p995    p999     rme  samples
-   · hand-written   34,193.47  0.0231  1.8689  0.0292  0.0260  0.1012  0.1385  0.2280  ±1.25%    17097
-   · ebin            6,562.77  0.1455  0.4887  0.1524  0.1510  0.2231  0.3824  0.4337  ±0.49%     3282
-   · binparse       83,492.02  0.0088  0.4232  0.0120  0.0112  0.0206  0.0441  0.1998  ±1.01%    41747   fastest
-   · binary-parser  81,531.16  0.0091  0.3228  0.0123  0.0116  0.0196  0.1451  0.1773  ±0.89%    40766
-   · destruct-js       444.80  2.1927  2.5115  2.2482  2.2405  2.4737  2.5067  2.5115  ±0.40%      223   slowest
-   · structron       4,517.64  0.2120  0.4687  0.2214  0.2188  0.4015  0.4144  0.4368  ±0.53%     2259
+   · hand-written   36,752.80  0.0230  1.9417  0.0272  0.0256  0.0536  0.1354  0.2044  ±1.13%    18377
+   · ebin            7,125.39  0.1333  0.3925  0.1403  0.1405  0.1619  0.2977  0.3684  ±0.39%     3563
+   · binparse       87,743.08  0.0088  0.5751  0.0114  0.0108  0.0243  0.0531  0.1513  ±0.83%    43872   fastest
+   · binary-parser  85,437.69  0.0092  0.3183  0.0117  0.0113  0.0166  0.1247  0.1390  ±0.74%    42719
+   · destruct-js       454.70  2.1401  2.4334  2.1993  2.1964  2.4094  2.4303  2.4334  ±0.33%      228   slowest
+   · structron       4,473.35  0.2056  0.4716  0.2235  0.2210  0.3757  0.3896  0.4290  ±0.50%     2237
+```
+
+### Serialization
+
+[benchmark/serialize.bench.ts](./benchmark/serialize.bench.ts)
+
+```
+ ✓ serialize.bench.ts (2) 1221ms
+     name                 hz     min     max    mean     p75     p99    p995    p999     rme  samples
+   · hand-written  31,129.66  0.0299  2.8017  0.0321  0.0332  0.0446  0.0500  0.0635  ±1.10%    15565   fastest
+   · ebin           8,498.26  0.1090  0.2768  0.1177  0.1188  0.1649  0.1747  0.2375  ±0.25%     4250
 ```
