@@ -16,7 +16,7 @@ class StringComputedSchema<TValue> extends ComputedSchema<string, TValue> {
   }
 }
 
-export class StringSchema extends DynamicLengthSchema<string> {
+class StringSchema extends DynamicLengthSchema<string> {
   primitiveType = 'string';
 
   computeByteLength(value: string): number {

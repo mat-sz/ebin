@@ -7,7 +7,7 @@ import {
 } from '../types.js';
 import { DynamicLengthSchema } from './any.js';
 
-export class ArraySchema<
+class ArraySchema<
   TItemSchema extends BaseSchema<any>,
   TValue = Infer<TItemSchema>,
 > extends DynamicLengthSchema<TValue[]> {

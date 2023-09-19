@@ -1,7 +1,7 @@
 import { BaseReader, BaseWriter } from '../types.js';
 import { AnySchema } from './any.js';
 
-export class BitSchema extends AnySchema<number> {
+class BitSchema extends AnySchema<number> {
   protected _littleEndian: boolean | undefined = undefined;
   primitiveType = 'number';
 

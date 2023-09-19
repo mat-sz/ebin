@@ -1,7 +1,7 @@
 import { BaseReader, BaseWriter } from '../types.js';
 import { AnySchema } from './any.js';
 
-export class CharSchema extends AnySchema<string> {
+class CharSchema extends AnySchema<string> {
   primitiveType = 'number';
   byteLength = 1;
 

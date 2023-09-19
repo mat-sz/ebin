@@ -13,7 +13,6 @@ import {
   TypedArray,
 } from '../types.js';
 import { AnySchema, DynamicLengthSchema } from './any.js';
-import type { NumberSchema } from './numeric.js';
 
 interface FieldSchema<TObject> {
   type: 'field';
@@ -163,7 +162,7 @@ export class StructSchema<
 
   withByteLength<
     TDynamicField extends KeysMatching<TSchema, DynamicLengthSchema>,
-    TLengthField extends KeysMatching<TSchema, NumberSchema<number>>,
+    TLengthField extends KeysMatching<TSchema, AnySchema<number>>,
   >(
     dynamicField: TDynamicField,
     lengthField: TLengthField,
@@ -189,7 +188,7 @@ export class StructSchema<
 
   withCount<
     TDynamicField extends KeysMatching<TSchema, DynamicLengthSchema>,
-    TLengthField extends KeysMatching<TSchema, NumberSchema<number>>,
+    TLengthField extends KeysMatching<TSchema, AnySchema<number>>,
   >(
     dynamicField: TDynamicField,
     lengthField: TLengthField,

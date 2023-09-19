@@ -1,7 +1,7 @@
 import { BaseReader, BaseWriter } from '../types.js';
 import { AnySchema } from './any.js';
 
-export class NumberSchema<T extends bigint | number> extends AnySchema<T> {
+class NumberSchema<T extends bigint | number> extends AnySchema<T> {
   protected _littleEndian: boolean | undefined = undefined;
   primitiveType = 'number';
 
