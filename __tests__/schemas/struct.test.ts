@@ -1,4 +1,4 @@
-import { struct, uint16, uint32, string, array } from '../../src';
+import { struct, uint16, uint32, string, array } from '../../src/index.js';
 
 const testStruct = struct({
   test1: uint16(),

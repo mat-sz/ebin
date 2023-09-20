@@ -1,4 +1,4 @@
-import { ArrayBufferReader } from '../../../src/io/arrayBuffer/reader';
+import { ArrayBufferReader } from '../../../src/io/arrayBuffer/reader.js';
 
 describe('ArrayBufferReader', () => {
   describe('float16', () => {

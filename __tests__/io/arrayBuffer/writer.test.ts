@@ -1,4 +1,4 @@
-import { ArrayBufferWriter } from '../../../src/io/arrayBuffer/writer';
+import { ArrayBufferWriter } from '../../../src/io/arrayBuffer/writer.js';
 
 describe('ArrayBufferWriter', () => {
   describe('float16', () => {
