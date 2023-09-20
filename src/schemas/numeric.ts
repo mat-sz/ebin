@@ -9,12 +9,14 @@ class NumberSchema<T extends bigint | number> extends AnySchema<T> {
     super();
   }
 
-  littleEndian() {
+  littleEndian(): this {
     this._littleEndian = true;
+    return this;
   }
 
-  bigEndian() {
+  bigEndian(): this {
     this._littleEndian = false;
+    return this;
   }
 }
 
