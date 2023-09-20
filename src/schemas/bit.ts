@@ -13,14 +13,6 @@ class BitSchema extends AnySchema<number> {
     super();
   }
 
-  littleEndian() {
-    this._littleEndian = true;
-  }
-
-  bigEndian() {
-    this._littleEndian = false;
-  }
-
   read(reader: BaseReader): number {
     return reader.readBit();
   }
