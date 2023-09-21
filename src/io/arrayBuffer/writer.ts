@@ -127,11 +127,6 @@ export class ArrayBufferWriter implements BaseWriter {
     }
   }
 
-  writeString(value: string): void {
-    const encoder = new TextEncoder();
-    this.writeBytes(encoder.encode(value));
-  }
-
   writeBytes(bytes: ArrayBuffer): void {
     const array = new Uint8Array(this.arrayBuffer);
     array.set(new Uint8Array(bytes), this.offset);

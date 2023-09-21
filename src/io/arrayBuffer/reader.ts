@@ -121,14 +121,6 @@ export class ArrayBufferReader implements BaseReader {
     }
   }
 
-  readString(byteLength: number): string {
-    this.bitOffset = 0;
-
-    const buffer = this.readBytes(byteLength);
-    const decoder = new TextDecoder();
-    return decoder.decode(buffer);
-  }
-
   readBytes(byteLength: number): ArrayBuffer {
     this.bitOffset = 0;
 
