@@ -97,7 +97,7 @@ class FloatSchema extends NumberSchema<number> {
   }
 }
 
-export function uint8(): UintSchema {
+export function uint8(): Omit<UintSchema, 'bigEndian' | 'littleEndian'> {
   return new UintSchema(1);
 }
 
@@ -113,7 +113,7 @@ export function uint64(): BigUintSchema {
   return new BigUintSchema();
 }
 
-export function int8(): IntSchema {
+export function int8(): Omit<UintSchema, 'bigEndian' | 'littleEndian'> {
   return new IntSchema(1);
 }
 
