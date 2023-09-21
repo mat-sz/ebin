@@ -209,6 +209,13 @@ assertion-error@^1.1.0:
   resolved "https://registry.yarnpkg.com/assertion-error/-/assertion-error-1.1.0.tgz#e60b6b0e8f301bd97e5375215bda406c85118c0b"
   integrity sha512-jgsaNduz+ndvGyFt3uSuWqvy4lCnIJiovtouQN5JZHOKCS2QuhEdbcQHFhVksz2N2U9hXJo8odG7ETyWlEeuDw==
 
+binary-parser-encoder@^1.5.3:
+  version "1.5.3"
+  resolved "https://registry.yarnpkg.com/binary-parser-encoder/-/binary-parser-encoder-1.5.3.tgz#c329a65f5a09d64bf0198e6ac908856048861d94"
+  integrity sha512-yu3tdLBYqPIwGRaXyswLoLrhaffkuZkNuXveq/jYoyBHQbFMjamHCWPFOmI2Qz+Go0Rh6wE9f6tt0EAvsgDD0g==
+  dependencies:
+    smart-buffer "^4.1.0"
+
 binary-parser@^2.2.1:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/binary-parser/-/binary-parser-2.2.1.tgz#4edc6da2dc56db73fa5ba450dfe6382ede8294ce"
@@ -413,6 +420,11 @@ siginfo@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/siginfo/-/siginfo-2.0.0.tgz#32e76c70b79724e3bb567cb9d543eb858ccfaf30"
   integrity sha512-ybx0WO1/8bSBLEWXZvEd7gMW3Sn3JFlW3TvX1nREbDLRNQNaeNN8WK0meBwPdAaOI7TtRRRJn/Es1zhrrCHu7g==
+
+smart-buffer@^4.1.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/smart-buffer/-/smart-buffer-4.2.0.tgz#6e1d71fa4f18c05f7d0ff216dd16a481d0e8d9ae"
+  integrity sha512-94hK0Hh8rPqQl2xXc3HsaBoOXKV20MToPkcXvwbISWLEs+64sBq5kFgn2kJDHb1Pry9yrP0dxrCI9RRci7RXKg==
 
 source-map-js@^1.0.2:
   version "1.0.2"

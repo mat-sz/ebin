@@ -80,7 +80,7 @@ Default byte order is big-endian (or inherited from parent `struct` if defined t
 
 This section is updated manually and may not reflect the current performance.
 
-Last updated on: 2023-09-19
+Last updated on: 2023-09-21
 
 Benchmarks are ran using vitest.
 
@@ -89,14 +89,14 @@ Benchmarks are ran using vitest.
 [benchmark/parse.bench.ts](./benchmark/parse.bench.ts)
 
 ```
- ✓ parse.bench.ts (6) 3677ms
+ ✓ parse.bench.ts (6) 3667ms
      name                  hz     min     max    mean     p75     p99    p995    p999     rme  samples
-   · hand-written   36,752.80  0.0230  1.9417  0.0272  0.0256  0.0536  0.1354  0.2044  ±1.13%    18377
-   · ebin            7,125.39  0.1333  0.3925  0.1403  0.1405  0.1619  0.2977  0.3684  ±0.39%     3563
-   · binparse       87,743.08  0.0088  0.5751  0.0114  0.0108  0.0243  0.0531  0.1513  ±0.83%    43872   fastest
-   · binary-parser  85,437.69  0.0092  0.3183  0.0117  0.0113  0.0166  0.1247  0.1390  ±0.74%    42719
-   · destruct-js       454.70  2.1401  2.4334  2.1993  2.1964  2.4094  2.4303  2.4334  ±0.33%      228   slowest
-   · structron       4,473.35  0.2056  0.4716  0.2235  0.2210  0.3757  0.3896  0.4290  ±0.50%     2237
+   · hand-written   36,459.60  0.0233  1.9810  0.0274  0.0262  0.0538  0.1260  0.2006  ±1.10%    18230
+   · ebin            7,286.30  0.1275  0.5070  0.1372  0.1375  0.1954  0.2930  0.3868  ±0.45%     3644
+   · binparse       85,836.32  0.0090  0.3042  0.0117  0.0111  0.0188  0.0322  0.1735  ±0.88%    42919   fastest
+   · binary-parser  83,666.60  0.0093  0.3056  0.0120  0.0114  0.0187  0.1277  0.1518  ±0.80%    41834
+   · destruct-js       468.61  2.0824  2.3800  2.1340  2.1383  2.3589  2.3600  2.3800  ±0.36%      235   slowest
+   · structron       4,906.39  0.1951  0.4470  0.2038  0.2026  0.3523  0.3699  0.4052  ±0.46%     2454
 ```
 
 ### Serialization
@@ -104,8 +104,11 @@ Benchmarks are ran using vitest.
 [benchmark/serialize.bench.ts](./benchmark/serialize.bench.ts)
 
 ```
- ✓ serialize.bench.ts (2) 1221ms
-     name                 hz     min     max    mean     p75     p99    p995    p999     rme  samples
-   · hand-written  31,129.66  0.0299  2.8017  0.0321  0.0332  0.0446  0.0500  0.0635  ±1.10%    15565   fastest
-   · ebin           8,498.26  0.1090  0.2768  0.1177  0.1188  0.1649  0.1747  0.2375  ±0.25%     4250
+ ✓ serialize.bench.ts (5) 3339ms
+     name                          hz      min      max     mean      p75      p99     p995     p999     rme  samples
+   · hand-written           31,502.19   0.0291   1.9691   0.0317   0.0323   0.0537   0.0640   0.0701  ±0.86%    15752   fastest
+   · ebin                    8,993.78   0.1029   0.2588   0.1112   0.1121   0.1681   0.1901   0.2414  ±0.32%     4497
+   · binary-parser-encoder   9,035.37   0.0993   2.6982   0.1107   0.1068   0.1525   0.1604   1.1980  ±1.96%     4518
+   · destruct-js              21.4143  45.4065  53.4103  46.6978  46.4058  53.4103  53.4103  53.4103  ±3.27%       11   slowest
+   · structron               4,053.49   0.2358   0.4834   0.2467   0.2445   0.4023   0.4195   0.4568  ±0.43%     2027
 ```

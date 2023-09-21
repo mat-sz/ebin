@@ -1,4 +1,7 @@
 import { bench } from 'vitest';
+import { Parser } from 'binary-parser-encoder';
+import Destruct from 'destruct-js';
+import Struct from 'structron';
 
 import { array, struct, uint16, uint32 } from '../src/index.js';
 
@@ -15,6 +18,38 @@ const EbinPoints = struct({
 })
   .littleEndian()
   .withCount('points', 'length');
+
+// binary-parser-encoder
+const Points = new Parser().uint32le('len').array('points', {
+  length: 'len',
+  type: new Parser().uint16le('x').uint16le('y').uint16le('z'),
+});
+
+// destruct-js
+const spec = new Destruct.Spec({ mode: Destruct.Mode.LE });
+spec
+  .field('len', Destruct.UInt32)
+  .loop(
+    'points',
+    r => r.len,
+    new Destruct.Spec({ mode: Destruct.Mode.LE })
+      .field('x', Destruct.UInt16)
+      .field('y', Destruct.UInt16)
+      .field('z', Destruct.UInt16),
+  );
+
+// structron
+const PointsStruct = new Struct()
+  .addMember(Struct.TYPES.UINT_LE, 'len')
+  .addArray(
+    new Struct()
+      .addMember(Struct.TYPES.USHORT_LE, 'x')
+      .addMember(Struct.TYPES.USHORT_LE, 'y')
+      .addMember(Struct.TYPES.USHORT_LE, 'z'),
+    'points',
+    0,
+    'len',
+  );
 
 // Prepare input
 const n = 1000;
@@ -36,4 +71,16 @@ bench('hand-written', () => {
 
 bench('ebin', () => {
   const buf = EbinPoints.toByteArray({ points });
+});
+
+bench('binary-parser-encoder', () => {
+  const buf = Points.encode({ points });
+});
+
+bench('destruct-js', () => {
+  const buf = spec.write({ len: points.length, points });
+});
+
+bench('structron', () => {
+  const buf = PointsStruct.write({ points });
 });

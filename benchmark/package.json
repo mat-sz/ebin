@@ -8,6 +8,7 @@
   },
   "devDependencies": {
     "binary-parser": "^2.2.1",
+    "binary-parser-encoder": "^1.5.3",
     "binparse": "^2.1.0",
     "destruct-js": "^0.2.13",
     "structron": "^0.4.3",
