@@ -3,7 +3,7 @@ import { DynamicLengthSchema } from './any.js';
 import { ComputedSchema } from './computed.js';
 
 class StringComputedSchema<TValue> extends ComputedSchema<string, TValue> {
-  computeByteLength(value: TValue): number {
+  getByteLength(value: TValue): number {
     const encoder = new TextEncoder();
     return encoder.encode(this.serialize(value)).byteLength;
   }
@@ -29,7 +29,7 @@ class StringComputedSchema<TValue> extends ComputedSchema<string, TValue> {
 class StringSchema extends DynamicLengthSchema<string> {
   primitiveType = 'string';
 
-  computeByteLength(value: string): number {
+  getByteLength(value: string): number {
     const encoder = new TextEncoder();
     return encoder.encode(value).byteLength;
   }

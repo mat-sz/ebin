@@ -2,7 +2,6 @@ import { BaseSchema, BaseReader, BaseWriter } from '../types.js';
 
 export class AnySchema<T = any> implements BaseSchema<T> {
   primitiveType: string | undefined = undefined;
-  byteLength = 0;
   readonly TYPE!: T;
 
   getCount(): number {
@@ -10,7 +9,7 @@ export class AnySchema<T = any> implements BaseSchema<T> {
   }
 
   getByteLength(): number {
-    return this.byteLength ?? 0;
+    return 0;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -35,11 +34,7 @@ export class DynamicLengthSchema<T = any> extends AnySchema<T> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  computeByteLength(value: T): number {
+  getByteLength(value?: T): number {
     return 0;
-  }
-
-  getByteLength(value?: T | undefined): number {
-    return value ? this.computeByteLength(value) : this.byteLength ?? 0;
   }
 }

@@ -3,7 +3,10 @@ import { AnySchema } from './any.js';
 
 class CharSchema extends AnySchema<string> {
   primitiveType = 'number';
-  byteLength = 1;
+
+  getByteLength(): number {
+    return 1;
+  }
 
   constructor() {
     super();

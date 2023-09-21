@@ -53,7 +53,7 @@ export class StructSchema<
     }
   }
 
-  computeByteLength(value: TObject): number {
+  getByteLength(value: TObject): number {
     let length = 0;
 
     for (const field of this._schema) {
@@ -144,7 +144,7 @@ export class StructSchema<
   }
 
   toByteArray(value: TObject): Uint8Array {
-    const length = this.computeByteLength(value);
+    const length = this.getByteLength(value);
     const array = new Uint8Array(length);
     const writer = new ArrayBufferWriter(array.buffer);
 

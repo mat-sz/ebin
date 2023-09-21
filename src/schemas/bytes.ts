@@ -5,7 +5,7 @@ import { ComputedSchema } from './computed.js';
 class BytesSchema<
   T extends ArrayBuffer | TypedArray,
 > extends DynamicLengthSchema<T> {
-  computeByteLength(value: T): number {
+  getByteLength(value: T): number {
     return value.byteLength;
   }
 }
@@ -29,10 +29,6 @@ class ArrayBufferComputedSchema<TValue> extends ComputedSchema<
 }
 
 class ArrayBufferSchema extends BytesSchema<ArrayBuffer> {
-  computeByteLength(value: ArrayBuffer): number {
-    return value.byteLength;
-  }
-
   read(reader: BaseReader, context?: ReadContext): ArrayBuffer {
     const byteLength = context?.byteLength;
     if (typeof byteLength !== 'number') {
@@ -59,10 +55,6 @@ export function arrayBuffer(): ArrayBufferSchema {
 }
 
 class Uint8ArraySchema extends BytesSchema<Uint8Array> {
-  computeByteLength(value: Uint8Array): number {
-    return value.byteLength;
-  }
-
   read(reader: BaseReader, context?: ReadContext): Uint8Array {
     const byteLength = context?.byteLength;
     if (typeof byteLength !== 'number') {

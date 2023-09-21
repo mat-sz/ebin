@@ -5,8 +5,12 @@ class NumberSchema<T extends bigint | number> extends AnySchema<T> {
   protected _littleEndian: boolean | undefined = undefined;
   primitiveType = 'number';
 
-  constructor(public byteLength: 1 | 2 | 4 | 8) {
+  constructor(protected _byteLength: 1 | 2 | 4 | 8) {
     super();
+  }
+
+  getByteLength(): number {
+    return this._byteLength;
   }
 
   littleEndian(): this {
@@ -21,17 +25,17 @@ class NumberSchema<T extends bigint | number> extends AnySchema<T> {
 }
 
 class IntSchema extends NumberSchema<number> {
-  constructor(public byteLength: 1 | 2 | 4) {
+  constructor(protected _byteLength: 1 | 2 | 4) {
     // TODO: Check byte length
-    super(byteLength);
+    super(_byteLength);
   }
 
   read(reader: BaseReader): number {
-    return reader.readInt(this.byteLength, this._littleEndian);
+    return reader.readInt(this._byteLength, this._littleEndian);
   }
 
   write(writer: BaseWriter, value: number): void {
-    writer.writeInt(this.byteLength, value, this._littleEndian);
+    writer.writeInt(this._byteLength, value, this._littleEndian);
   }
 }
 
@@ -52,17 +56,17 @@ class BigIntSchema extends NumberSchema<bigint> {
 }
 
 class UintSchema extends NumberSchema<number> {
-  constructor(public byteLength: 1 | 2 | 4) {
+  constructor(protected _byteLength: 1 | 2 | 4) {
     // TODO: Check byte length
-    super(byteLength);
+    super(_byteLength);
   }
 
   read(reader: BaseReader): number {
-    return reader.readUint(this.byteLength, this._littleEndian);
+    return reader.readUint(this._byteLength, this._littleEndian);
   }
 
   write(writer: BaseWriter, value: number): void {
-    writer.writeUint(this.byteLength, value, this._littleEndian);
+    writer.writeUint(this._byteLength, value, this._littleEndian);
   }
 }
 
@@ -83,17 +87,17 @@ class BigUintSchema extends NumberSchema<bigint> {
 }
 
 class FloatSchema extends NumberSchema<number> {
-  constructor(public byteLength: 2 | 4 | 8) {
+  constructor(protected _byteLength: 2 | 4 | 8) {
     // TODO: Check byte length
-    super(byteLength);
+    super(_byteLength);
   }
 
   read(reader: BaseReader): number {
-    return reader.readFloat(this.byteLength, this._littleEndian);
+    return reader.readFloat(this._byteLength, this._littleEndian);
   }
 
   write(writer: BaseWriter, value: number): void {
-    writer.writeFloat(this.byteLength, value, this._littleEndian);
+    writer.writeFloat(this._byteLength, value, this._littleEndian);
   }
 }
 
@@ -113,7 +117,7 @@ export function uint64(): BigUintSchema {
   return new BigUintSchema();
 }
 
-export function int8(): Omit<UintSchema, 'bigEndian' | 'littleEndian'> {
+export function int8(): Omit<IntSchema, 'bigEndian' | 'littleEndian'> {
   return new IntSchema(1);
 }
 

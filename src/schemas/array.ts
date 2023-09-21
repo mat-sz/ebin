@@ -17,7 +17,7 @@ class ArraySchema<
     super();
   }
 
-  computeByteLength(value: TValue[]): number {
+  getByteLength(value: TValue[]): number {
     return value.reduce(
       (byteLength, item) => byteLength + this.itemType.getByteLength(item),
       0,
