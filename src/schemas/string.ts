@@ -3,8 +3,18 @@ import { DynamicLengthSchema } from './any.js';
 import { ComputedSchema } from './computed.js';
 
 class StringComputedSchema<TValue> extends ComputedSchema<string, TValue> {
-  read(reader: BaseReader): TValue {
-    const buffer = reader.readBytes(length);
+  computeByteLength(value: TValue): number {
+    const encoder = new TextEncoder();
+    return encoder.encode(this.serialize(value)).byteLength;
+  }
+
+  read(reader: BaseReader, context?: ReadContext): TValue {
+    const byteLength = context?.byteLength;
+    if (typeof byteLength !== 'number') {
+      throw new Error('Invalid byteLength');
+    }
+
+    const buffer = reader.readBytes(byteLength);
     const decoder = new TextDecoder();
     return this.parse(decoder.decode(buffer));
   }

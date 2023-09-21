@@ -1,4 +1,4 @@
-import { BaseReader, BaseWriter, TypedArray } from '../types.js';
+import { BaseReader, BaseWriter, ReadContext, TypedArray } from '../types.js';
 import { DynamicLengthSchema } from './any.js';
 import { ComputedSchema } from './computed.js';
 
@@ -14,8 +14,13 @@ class ArrayBufferComputedSchema<TValue> extends ComputedSchema<
   ArrayBuffer,
   TValue
 > {
-  read(reader: BaseReader): TValue {
-    return this.parse(reader.readBytes(this.byteLength));
+  read(reader: BaseReader, context?: ReadContext): TValue {
+    const byteLength = context?.byteLength;
+    if (typeof byteLength !== 'number') {
+      throw new Error('Invalid byteLength');
+    }
+
+    return this.parse(reader.readBytes(byteLength));
   }
 
   write(writer: BaseWriter, value: TValue): void {
@@ -24,8 +29,17 @@ class ArrayBufferComputedSchema<TValue> extends ComputedSchema<
 }
 
 class ArrayBufferSchema extends BytesSchema<ArrayBuffer> {
-  read(reader: BaseReader): ArrayBuffer {
-    return reader.readBytes(this.byteLength);
+  computeByteLength(value: ArrayBuffer): number {
+    return value.byteLength;
+  }
+
+  read(reader: BaseReader, context?: ReadContext): ArrayBuffer {
+    const byteLength = context?.byteLength;
+    if (typeof byteLength !== 'number') {
+      throw new Error('Invalid byteLength');
+    }
+
+    return reader.readBytes(byteLength);
   }
 
   write(writer: BaseWriter, value: ArrayBuffer): void {
@@ -45,8 +59,17 @@ export function arrayBuffer(): ArrayBufferSchema {
 }
 
 class Uint8ArraySchema extends BytesSchema<Uint8Array> {
-  read(reader: BaseReader): Uint8Array {
-    const buffer = reader.readBytes(this.byteLength);
+  computeByteLength(value: Uint8Array): number {
+    return value.byteLength;
+  }
+
+  read(reader: BaseReader, context?: ReadContext): Uint8Array {
+    const byteLength = context?.byteLength;
+    if (typeof byteLength !== 'number') {
+      throw new Error('Invalid byteLength');
+    }
+
+    const buffer = reader.readBytes(byteLength);
     return new Uint8Array(buffer);
   }
 
