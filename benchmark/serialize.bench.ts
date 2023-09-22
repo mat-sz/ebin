@@ -59,13 +59,24 @@ for (let i = 0; i < n; i++) {
   points.push({ x: 123, y: 456, z: 789 });
 }
 
-bench('hand-written', () => {
+bench('hand-written - Buffer', () => {
   const buf = Buffer.alloc(4 + n * 2 * 3);
   buf.writeUInt32LE(points.length, 0);
   for (let i = 0; i < points.length; i++) {
     buf.writeUInt16LE(points[i].x, i * 6 + 0 + 4);
     buf.writeUInt16LE(points[i].y, i * 6 + 2 + 4);
     buf.writeUInt16LE(points[i].z, i * 6 + 4 + 4);
+  }
+});
+
+bench('hand-written - DataView', () => {
+  const buf = new Uint8Array(4 + n * 2 * 3).buffer;
+  const dataView = new DataView(buf);
+  dataView.setUint32(points.length, 0, true);
+  for (let i = 0; i < points.length; i++) {
+    dataView.setUint16(points[i].x, i * 6 + 0 + 4, true);
+    dataView.setUint16(points[i].y, i * 6 + 2 + 4, true);
+    dataView.setUint16(points[i].z, i * 6 + 4 + 4, true);
   }
 });
 

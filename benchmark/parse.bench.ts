@@ -76,7 +76,7 @@ for (let i = 0; i < n; i++) {
   buf.writeUInt16LE(789, i * 6 + 4 + 4);
 }
 
-bench('hand-written', () => {
+bench('hand-written - Buffer', () => {
   const n = buf.readUInt32LE(0);
   const points = [];
   for (let i = 0; i < n; i++) {
@@ -84,6 +84,19 @@ bench('hand-written', () => {
       x: buf.readUInt16LE(i * 6 + 0 + 4),
       y: buf.readUInt16LE(i * 6 + 2 + 4),
       z: buf.readUInt16LE(i * 6 + 4 + 4),
+    });
+  }
+});
+
+bench('hand-written - DataView', () => {
+  const dataView = new DataView(new Uint8Array(buf).buffer);
+  const n = dataView.getUint32(0, true);
+  const points = [];
+  for (let i = 0; i < n; i++) {
+    points.push({
+      x: dataView.getUint16(i * 6 + 0 + 4, true),
+      y: dataView.getUint16(i * 6 + 2 + 4, true),
+      z: dataView.getUint16(i * 6 + 4 + 4, true),
     });
   }
 });
