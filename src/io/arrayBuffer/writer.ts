@@ -18,6 +18,11 @@ export class ArrayBufferWriter implements BaseWriter {
     return this.offset + this.bitOffset / 8;
   }
 
+  private incrementOffset(bytes: number) {
+    this.bitOffset = 0;
+    this.offset += bytes;
+  }
+
   writeBits(count: number, value: number): void {
     for (let i = 0; i < count; i++) {
       this.writeBit(+!!(value & (1 << (count - 1 - i))));
@@ -36,8 +41,7 @@ export class ArrayBufferWriter implements BaseWriter {
 
     if (this.bitOffset === 7) {
       this.dataView.setUint8(this.offset, this.bitsLastByte);
-      this.bitOffset = 0;
-      this.offset++;
+      this.incrementOffset(1);
     } else {
       this.bitOffset++;
     }
@@ -69,7 +73,7 @@ export class ArrayBufferWriter implements BaseWriter {
           throw new Error(`Invalid byteLength = ${byteLength}`);
       }
     } finally {
-      this.offset += byteLength;
+      this.incrementOffset(byteLength);
     }
   }
 
@@ -99,7 +103,7 @@ export class ArrayBufferWriter implements BaseWriter {
           throw new Error(`Invalid byteLength = ${byteLength}`);
       }
     } finally {
-      this.offset += byteLength;
+      this.incrementOffset(byteLength);
     }
   }
 
@@ -123,13 +127,13 @@ export class ArrayBufferWriter implements BaseWriter {
           throw new Error(`Invalid byteLength = ${byteLength}`);
       }
     } finally {
-      this.offset += byteLength;
+      this.incrementOffset(byteLength);
     }
   }
 
   writeBytes(bytes: ArrayBuffer): void {
     const array = new Uint8Array(this.arrayBuffer);
     array.set(new Uint8Array(bytes), this.offset);
-    this.offset += bytes.byteLength;
+    this.incrementOffset(bytes.byteLength);
   }
 }

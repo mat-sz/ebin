@@ -18,6 +18,11 @@ export class ArrayBufferReader implements BaseReader {
     return this.offset + this.bitOffset / 8;
   }
 
+  private incrementOffset(bytes: number) {
+    this.bitOffset = 0;
+    this.offset += bytes;
+  }
+
   readBits(count: number): number {
     let output = 0;
 
@@ -39,8 +44,7 @@ export class ArrayBufferReader implements BaseReader {
     const bit = +!!(this.bitsLastByte & (1 << (7 - this.bitOffset)));
 
     if (this.bitOffset === 7) {
-      this.bitOffset = 0;
-      this.offset++;
+      this.incrementOffset(1);
     } else {
       this.bitOffset++;
     }
@@ -69,7 +73,7 @@ export class ArrayBufferReader implements BaseReader {
 
       throw new Error(`Invalid byteLength = ${byteLength}`);
     } finally {
-      this.offset += byteLength;
+      this.incrementOffset(byteLength);
     }
   }
 
@@ -79,8 +83,6 @@ export class ArrayBufferReader implements BaseReader {
     byteLength: 1 | 2 | 4 | 8,
     littleEndian = this.littleEndian,
   ): number | bigint {
-    this.bitOffset = 0;
-
     try {
       switch (byteLength) {
         case 1:
@@ -96,13 +98,11 @@ export class ArrayBufferReader implements BaseReader {
 
       throw new Error(`Invalid byteLength = ${byteLength}`);
     } finally {
-      this.offset += byteLength;
+      this.incrementOffset(byteLength);
     }
   }
 
   readFloat(byteLength: 2 | 4 | 8, littleEndian = this.littleEndian): number {
-    this.bitOffset = 0;
-
     try {
       switch (byteLength) {
         case 2:
@@ -117,17 +117,15 @@ export class ArrayBufferReader implements BaseReader {
 
       throw new Error(`Invalid byteLength = ${byteLength}`);
     } finally {
-      this.offset += byteLength;
+      this.incrementOffset(byteLength);
     }
   }
 
   readBytes(byteLength: number): ArrayBuffer {
-    this.bitOffset = 0;
-
     try {
       return this.arrayBuffer.slice(this.offset, this.offset + byteLength);
     } finally {
-      this.offset += byteLength;
+      this.incrementOffset(byteLength);
     }
   }
 }
