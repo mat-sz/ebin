@@ -39,8 +39,11 @@ testStruct.parse(new Uint8Array([0, 1, 0, 1, 0, 0, 0, 1]));
 // => { test1: 1, test2: 1, test3: 1 }
 ```
 
+More examples: [./examples](./examples)
+
 ## Project goals
 
+- Isomorphism - using APIs available in node.js, bun, Deno and mainstream browsers
 - Extensibility
 - Ease of use
 - Support for both parsing and serializing (most libraries only support parsing)
