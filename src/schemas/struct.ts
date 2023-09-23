@@ -72,11 +72,10 @@ export class StructSchema<
   }
 
   read(reader: BaseReader): TObject {
+    const littleEndian = reader.littleEndian;
     if (typeof this._littleEndian !== 'undefined') {
       reader.littleEndian = this._littleEndian;
     }
-
-    const littleEndian = reader.littleEndian;
 
     let obj = {} as TObject;
 
@@ -84,9 +83,6 @@ export class StructSchema<
       if (field.condition && !field.condition(obj)) {
         continue;
       }
-
-      // Since child structs can override that, we need to make sure to reset it back.
-      reader.littleEndian = littleEndian;
 
       if (field.type === 'field') {
         obj[field.key] = field.schema.read(
@@ -105,15 +101,17 @@ export class StructSchema<
       delete obj[key];
     }
 
+    // Since child structs can override that, we need to make sure to reset it back.
+    reader.littleEndian = littleEndian;
+
     return obj;
   }
 
   write(writer: BaseWriter, value: TObject): void {
+    const littleEndian = writer.littleEndian;
     if (typeof this._littleEndian !== 'undefined') {
       writer.littleEndian = this._littleEndian;
     }
-
-    const littleEndian = writer.littleEndian;
 
     for (const key of Object.keys(this._propertyWriteValueFn)) {
       value[key as keyof TObject] = this._propertyWriteValueFn[key]!(
@@ -126,15 +124,15 @@ export class StructSchema<
         continue;
       }
 
-      // Since child structs can override that, we need to make sure to reset it back.
-      writer.littleEndian = littleEndian;
-
       if (field.type === 'field') {
         field.schema.write(writer, value[field.key]);
       } else {
         field.schema.write(writer, value);
       }
     }
+
+    // Since child structs can override that, we need to make sure to reset it back.
+    writer.littleEndian = littleEndian;
   }
 
   fromByteArray(array: TypedArray): TObject {
