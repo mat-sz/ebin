@@ -136,8 +136,9 @@ export class StructSchema<
   }
 
   fromByteArray(array: TypedArray): TObject {
-    // A new Uint8Array is needed here to make node.js Buffers work without issues.
-    const reader = new ArrayBufferReader(new Uint8Array(array).buffer);
+    const reader = new ArrayBufferReader(
+      array.buffer.slice(array.byteOffset, array.byteOffset + array.byteLength),
+    );
     return this.read(reader);
   }
 
