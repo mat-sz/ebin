@@ -8,3 +8,4 @@ yarn.lock
 tsconfig.json
 .eslintrc.json
 coverage
+vite*js

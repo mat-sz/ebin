@@ -18,7 +18,7 @@
     "test": "vitest",
     "build": "tsc",
     "lint": "eslint src",
-    "coverage": "vitest --coverage"
+    "coverage": "vitest --coverage --run"
   },
   "repository": {
     "type": "git",
