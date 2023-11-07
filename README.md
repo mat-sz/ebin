@@ -83,7 +83,7 @@ Default byte order is big-endian (or inherited from parent `struct` if defined t
 
 This section is updated manually and may not reflect the current performance.
 
-Last updated on: 2023-09-21
+Last updated on: 2023-11-07
 
 Benchmarks are ran using vitest.
 
@@ -92,14 +92,15 @@ Benchmarks are ran using vitest.
 [benchmark/parse.bench.ts](./benchmark/parse.bench.ts)
 
 ```
- ✓ parse.bench.ts (6) 3667ms
-     name                  hz     min     max    mean     p75     p99    p995    p999     rme  samples
-   · hand-written   36,459.60  0.0233  1.9810  0.0274  0.0262  0.0538  0.1260  0.2006  ±1.10%    18230
-   · ebin            7,286.30  0.1275  0.5070  0.1372  0.1375  0.1954  0.2930  0.3868  ±0.45%     3644
-   · binparse       85,836.32  0.0090  0.3042  0.0117  0.0111  0.0188  0.0322  0.1735  ±0.88%    42919   fastest
-   · binary-parser  83,666.60  0.0093  0.3056  0.0120  0.0114  0.0187  0.1277  0.1518  ±0.80%    41834
-   · destruct-js       468.61  2.0824  2.3800  2.1340  2.1383  2.3589  2.3600  2.3800  ±0.36%      235   slowest
-   · structron       4,906.39  0.1951  0.4470  0.2038  0.2026  0.3523  0.3699  0.4052  ±0.46%     2454
+ ✓ parse.bench.ts (7) 4289ms
+     name                            hz     min     max    mean     p75     p99    p995    p999     rme  samples
+   · hand-written - Buffer    38,073.37  0.0224  1.1365  0.0263  0.0256  0.0514  0.1000  0.1537  ±0.66%    19037
+   · hand-written - DataView  83,900.11  0.0085  0.3170  0.0119  0.0113  0.0237  0.0350  0.1705  ±0.83%    41952
+   · ebin                      9,045.28  0.1015  0.3712  0.1106  0.1112  0.1335  0.2404  0.3269  ±0.37%     4523
+   · binparse                 89,955.43  0.0086  0.2916  0.0111  0.0107  0.0180  0.0257  0.1475  ±0.75%    44978   fastest
+   · binary-parser            83,574.26  0.0092  0.2642  0.0120  0.0116  0.0187  0.0988  0.1394  ±0.67%    41788
+   · destruct-js                 478.33  1.9740  2.9790  2.0906  2.0833  2.4716  2.9475  2.9790  ±0.65%      240   slowest
+   · structron                 4,134.37  0.2169  1.7895  0.2419  0.2454  0.4206  0.4521  0.6487  ±0.86%     2068
 ```
 
 ### Serialization
@@ -107,11 +108,12 @@ Benchmarks are ran using vitest.
 [benchmark/serialize.bench.ts](./benchmark/serialize.bench.ts)
 
 ```
- ✓ serialize.bench.ts (5) 3339ms
-     name                          hz      min      max     mean      p75      p99     p995     p999     rme  samples
-   · hand-written           31,502.19   0.0291   1.9691   0.0317   0.0323   0.0537   0.0640   0.0701  ±0.86%    15752   fastest
-   · ebin                    8,993.78   0.1029   0.2588   0.1112   0.1121   0.1681   0.1901   0.2414  ±0.32%     4497
-   · binary-parser-encoder   9,035.37   0.0993   2.6982   0.1107   0.1068   0.1525   0.1604   1.1980  ±1.96%     4518
-   · destruct-js              21.4143  45.4065  53.4103  46.6978  46.4058  53.4103  53.4103  53.4103  ±3.27%       11   slowest
-   · structron               4,053.49   0.2358   0.4834   0.2467   0.2445   0.4023   0.4195   0.4568  ±0.43%     2027
+ ✓ serialize.bench.ts (6) 3986ms
+     name                             hz      min      max     mean      p75      p99     p995     p999     rme  samples
+   · hand-written - Buffer     30,164.39   0.0302   2.4920   0.0332   0.0335   0.0576   0.0617   0.0735  ±1.27%    15083
+   · hand-written - DataView  117,527.08   0.0069   0.9560   0.0085   0.0083   0.0165   0.0188   0.0269  ±0.48%    58764   fastest
+   · ebin                      13,667.18   0.0661   0.3482   0.0732   0.0699   0.1359   0.1464   0.2088  ±0.48%     6834
+   · binary-parser-encoder     10,818.21   0.0814   2.5627   0.0924   0.0911   0.1276   0.1642   1.0452  ±1.87%     5410
+   · destruct-js                 21.3463  45.4628  50.0825  46.8466  47.7370  50.0825  50.0825  50.0825  ±1.88%       11   slowest
+   · structron                  3,792.20   0.2457   0.5219   0.2637   0.2617   0.4193   0.4495   0.5097  ±0.46%     1897
 ```
