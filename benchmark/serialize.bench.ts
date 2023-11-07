@@ -81,17 +81,17 @@ bench('hand-written - DataView', () => {
 });
 
 bench('ebin', () => {
-  const buf = EbinPoints.toByteArray({ points });
+  EbinPoints.toByteArray({ points });
 });
 
 bench('binary-parser-encoder', () => {
-  const buf = Points.encode({ points });
+  Points.encode({ points });
 });
 
 bench('destruct-js', () => {
-  const buf = spec.write({ len: points.length, points });
+  spec.write({ len: points.length, points });
 });
 
 bench('structron', () => {
-  const buf = PointsStruct.write({ points });
+  PointsStruct.write({ points });
 });

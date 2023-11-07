@@ -102,21 +102,21 @@ bench('hand-written - DataView', () => {
 });
 
 bench('ebin', () => {
-  const points = EbinPoints.fromByteArray(buf);
+  EbinPoints.fromByteArray(buf);
 });
 
 bench('binparse', () => {
-  const points = PointsParser.read(buf);
+  PointsParser.read(buf);
 });
 
 bench('binary-parser', () => {
-  const points = Points.parse(buf);
+  Points.parse(buf);
 });
 
 bench('destruct-js', () => {
-  const points = spec.read(buf);
+  spec.read(buf);
 });
 
 bench('structron', () => {
-  const points = PointsStruct.read(buf, 0);
+  PointsStruct.read(buf, 0);
 });
