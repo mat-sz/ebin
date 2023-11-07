@@ -3,6 +3,9 @@ import { BaseSchema, BaseReader, BaseWriter, ReadContext } from '../types.js';
 export class AnySchema<T = any> implements BaseSchema<T> {
   primitiveType: string | undefined = undefined;
   readonly TYPE!: T;
+  get isConstantSize(): boolean {
+    return false;
+  }
 
   getCount(): number {
     return 1;

@@ -3,7 +3,9 @@ import { AnySchema } from './any.js';
 
 class CharSchema extends AnySchema<string> {
   primitiveType = 'number';
-
+  get isConstantSize(): boolean {
+    return true;
+  }
   getByteLength(): number {
     return 1;
   }

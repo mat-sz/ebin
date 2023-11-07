@@ -8,6 +8,7 @@ export interface ReadContext {
 export interface BaseSchema<T = any> {
   readonly TYPE: T;
   readonly primitiveType: string | undefined;
+  readonly isConstantSize: boolean;
 
   getByteLength(value?: T): number;
   getCount(value?: T): number;

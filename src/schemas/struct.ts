@@ -52,6 +52,20 @@ export class StructSchema<
     }
   }
 
+  get isConstantSize() {
+    for (const field of this._schema) {
+      if (field.condition) {
+        return false;
+      }
+
+      if (!field.schema.isConstantSize) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   getByteLength(value: TObject): number {
     let length = 0;
 

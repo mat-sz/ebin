@@ -4,6 +4,9 @@ import { AnySchema } from './any.js';
 class BitsSchema extends AnySchema<number> {
   protected _littleEndian: boolean | undefined = undefined;
   primitiveType = 'number';
+  get isConstantSize(): boolean {
+    return true;
+  }
 
   getByteLength() {
     return this.bitLength / 8;

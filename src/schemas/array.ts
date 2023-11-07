@@ -18,6 +18,10 @@ class ArraySchema<
   }
 
   getByteLength(value: TValue[]): number {
+    if (this.itemType.isConstantSize) {
+      return value.length * this.itemType.getByteLength(value[0]);
+    }
+
     return value.reduce(
       (byteLength, item) => byteLength + this.itemType.getByteLength(item),
       0,

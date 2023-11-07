@@ -4,6 +4,9 @@ import { AnySchema } from './any.js';
 class NumberSchema<T extends bigint | number> extends AnySchema<T> {
   protected _littleEndian: boolean | undefined = undefined;
   primitiveType = 'number';
+  get isConstantSize(): boolean {
+    return true;
+  }
 
   constructor(protected _byteLength: 1 | 2 | 4 | 8) {
     super();
