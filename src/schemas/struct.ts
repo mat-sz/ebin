@@ -9,6 +9,7 @@ import {
   KeysMatching,
   ObjectSchema,
   ObjectType,
+  PartialBy,
   ReadContext,
   TypedArray,
 } from '../types.js';
@@ -31,8 +32,6 @@ export class StructSchema<
   TObject extends { [K in keyof TSchema]?: any } = ObjectType<TSchema>,
 > extends DynamicLengthSchema<TObject> {
   readonly SCHEMA!: TSchema;
-
-  private _hiddenFields: (keyof TSchema)[] = [];
 
   private _propertyWriteValueFn: {
     [K in keyof TObject]?: (value: TObject) => keyof TObject;
@@ -95,10 +94,6 @@ export class StructSchema<
           ...field.schema.read(reader),
         };
       }
-    }
-
-    for (const key of this._hiddenFields) {
-      delete obj[key];
     }
 
     // Since child structs can override that, we need to make sure to reset it back.
@@ -165,7 +160,7 @@ export class StructSchema<
   >(
     dynamicField: TDynamicField,
     lengthField: TLengthField,
-  ): StructSchema<Omit<TSchema, TLengthField>> {
+  ): StructSchema<PartialBy<TSchema, TLengthField>> {
     const dynamicSchema = this._schema.find(
       schema => schema.type === 'field' && schema.key === dynamicField,
     );
@@ -180,7 +175,6 @@ export class StructSchema<
     this._propertyReadContextFn[dynamicField] = value => ({
       byteLength: value[lengthField],
     });
-    this._hiddenFields.push(lengthField);
 
     return this as any;
   }
@@ -191,7 +185,7 @@ export class StructSchema<
   >(
     dynamicField: TDynamicField,
     lengthField: TLengthField,
-  ): StructSchema<Omit<TSchema, TLengthField>> {
+  ): StructSchema<PartialBy<TSchema, TLengthField>> {
     const dynamicSchema = this._schema.find(
       schema => schema.type === 'field' && schema.key === dynamicField,
     );
@@ -206,7 +200,6 @@ export class StructSchema<
     this._propertyReadContextFn[dynamicField] = value => ({
       count: value[lengthField],
     });
-    this._hiddenFields.push(lengthField);
 
     return this as any;
   }
@@ -224,7 +217,7 @@ export class StructSchema<
   }
 
   switch<
-    TSwitchField extends KeysMatching<TSchema, AnySchema<number | string>>,
+    TSwitchField extends KeysMatching<TSchema, BaseSchema<number | string>>,
     TSwitchCases extends Record<TSwitchCaseKey, StructSchema<any, any>>,
     TSwitchCaseKey extends Infer<TSchema[TSwitchField]>,
     TSwitchSchema = {

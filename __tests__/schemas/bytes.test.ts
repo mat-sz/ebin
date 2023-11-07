@@ -21,6 +21,7 @@ describe('uint8Array', () => {
       ),
     ).toEqual({
       data: new Uint8Array([0xff, 0xee, 0xdd, 0xcc]),
+      length: 4,
     });
   });
 });
@@ -46,6 +47,7 @@ describe('arrayBuffer', () => {
       ),
     ).toEqual({
       data: new Uint8Array([0xff, 0xee, 0xdd, 0xcc]).buffer,
+      length: 4,
     });
   });
 });

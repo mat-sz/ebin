@@ -94,6 +94,7 @@ describe('struct', () => {
           testStructStr.fromByteArray(new Uint8Array([0, 3, 97, 98, 99])),
         ).toEqual({
           str: 'abc',
+          test: 3,
         });
       });
     });
@@ -112,6 +113,7 @@ describe('struct', () => {
           ),
         ).toEqual({
           array: [1, 2, 3],
+          test: 6,
         });
       });
     });
@@ -132,6 +134,7 @@ describe('struct', () => {
           ),
         ).toEqual({
           array: [1, 2, 3],
+          test: 3,
         });
       });
     });

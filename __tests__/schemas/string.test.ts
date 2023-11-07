@@ -21,6 +21,7 @@ describe('string', () => {
       ),
     ).toEqual({
       data: 'TEST',
+      length: 4,
     });
   });
 });
@@ -44,6 +45,7 @@ describe('json', () => {
       testStruct.fromByteArray(new Uint8Array([0x00, 0x02, 0x7b, 0x7d])),
     ).toEqual({
       data: {},
+      length: 2,
     });
   });
 });

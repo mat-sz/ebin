@@ -65,6 +65,7 @@ export type If<B extends Boolean, Then, Else> = B extends true ? Then : Else;
 
 export type Optionalize<S extends object> = OmitBy<S, undefined> &
   Partial<PickBy<S, undefined>>;
+export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 export type PickBy<T, V> = Pick<
   T,
