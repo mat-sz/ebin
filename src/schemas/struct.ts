@@ -27,9 +27,40 @@ interface ChildSchema<TObject> {
   condition?: (obj: TObject) => boolean;
 }
 
+type StructObject<TSchema extends ObjectSchema> = {
+  [K in keyof TSchema]?: any;
+};
+type SwitchCases<TSwitchCaseKey extends keyof any> = Record<
+  TSwitchCaseKey,
+  StructSchema<any, any>
+>;
+type SwitchSchema<TSwitchCases extends SwitchCases<any>> = {
+  [K in keyof TSwitchCases]: InferSchema<TSwitchCases[K]>;
+}[keyof TSwitchCases];
+type SwitchObject<
+  TObject extends StructObject<any>,
+  TSwitchCases extends SwitchCases<any>,
+  TSwitchField extends keyof any,
+  TObjectWithoutCaseKey = Omit<TObject, TSwitchField>,
+> = {
+  [K in keyof TSwitchCases]: TObjectWithoutCaseKey &
+    Infer<TSwitchCases[K]> & {
+      [J in TSwitchField]: K;
+    };
+}[keyof TSwitchCases];
+type SwitchStructSchema<
+  TSchema extends ObjectSchema,
+  TObject extends StructObject<TSchema>,
+  TSwitchCases extends SwitchCases<any>,
+  TSwitchField extends keyof any,
+> = StructSchema<
+  TSchema & SwitchSchema<TSwitchCases>,
+  TObject | SwitchObject<TObject, TSwitchCases, TSwitchField>
+>;
+
 export class StructSchema<
   TSchema extends ObjectSchema,
-  TObject extends { [K in keyof TSchema]?: any } = ObjectType<TSchema>,
+  TObject extends StructObject<TSchema> = ObjectType<TSchema>,
 > extends DynamicLengthSchema<TObject> {
   readonly SCHEMA!: TSchema;
 
@@ -84,13 +115,13 @@ export class StructSchema<
     return length;
   }
 
-  read(reader: BaseReader): TObject {
+  read(reader: BaseReader): Required<TObject> {
     const littleEndian = reader.littleEndian;
     if (typeof this._littleEndian !== 'undefined') {
       reader.littleEndian = this._littleEndian;
     }
 
-    let obj = {} as TObject;
+    let obj = {} as Required<TObject>;
 
     for (const field of this._schema) {
       if (field.condition && !field.condition(obj)) {
@@ -144,7 +175,7 @@ export class StructSchema<
     writer.littleEndian = littleEndian;
   }
 
-  fromByteArray(array: TypedArray): TObject {
+  fromByteArray(array: TypedArray): Required<TObject> {
     const reader = new ArrayBufferReader(
       array.buffer.slice(array.byteOffset, array.byteOffset + array.byteLength),
     );
@@ -160,7 +191,7 @@ export class StructSchema<
     return array;
   }
 
-  fromArrayBuffer(buffer: ArrayBuffer): TObject {
+  fromArrayBuffer(buffer: ArrayBuffer): Required<TObject> {
     return this.fromByteArray(new Uint8Array(buffer));
   }
 
@@ -174,7 +205,10 @@ export class StructSchema<
   >(
     dynamicField: TDynamicField,
     lengthField: TLengthField,
-  ): StructSchema<PartialBy<TSchema, TLengthField>> {
+  ): StructSchema<
+    PartialBy<TSchema, TLengthField>,
+    PartialBy<TObject, TLengthField>
+  > {
     const dynamicSchema = this._schema.find(
       schema => schema.type === 'field' && schema.key === dynamicField,
     );
@@ -199,7 +233,10 @@ export class StructSchema<
   >(
     dynamicField: TDynamicField,
     lengthField: TLengthField,
-  ): StructSchema<PartialBy<TSchema, TLengthField>> {
+  ): StructSchema<
+    PartialBy<TSchema, TLengthField>,
+    PartialBy<TObject, TLengthField>
+  > {
     const dynamicSchema = this._schema.find(
       schema => schema.type === 'field' && schema.key === dynamicField,
     );
@@ -232,21 +269,12 @@ export class StructSchema<
 
   switch<
     TSwitchField extends KeysMatching<TSchema, BaseSchema<number | string>>,
-    TSwitchCases extends Record<TSwitchCaseKey, StructSchema<any, any>>,
+    TSwitchCases extends SwitchCases<TSwitchCaseKey>,
     TSwitchCaseKey extends Infer<TSchema[TSwitchField]>,
-    TSwitchSchema = {
-      [K in keyof TSwitchCases]: InferSchema<TSwitchCases[K]>;
-    }[keyof TSwitchCases],
-    TSwitchObject = {
-      [K in keyof TSwitchCases]: Omit<TObject, TSwitchField> &
-        Infer<TSwitchCases[K]> & {
-          [J in TSwitchField]: K;
-        };
-    }[keyof TSwitchCases],
   >(
     field: TSwitchField,
     cases: TSwitchCases,
-  ): StructSchema<TSchema & TSwitchSchema, TObject | TSwitchObject> {
+  ): SwitchStructSchema<TSchema, TObject, TSwitchCases, TSwitchField> {
     const switchField = this._schema.find(
       f => f.type === 'field' && f.key === field,
     );
