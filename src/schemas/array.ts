@@ -1,9 +1,12 @@
+import { ArrayBufferReader } from '../io/arrayBuffer/reader.js';
+import { ArrayBufferWriter } from '../io/arrayBuffer/writer.js';
 import {
   BaseReader,
   BaseSchema,
   BaseWriter,
   Infer,
   ReadContext,
+  TypedArray,
 } from '../types.js';
 import { DynamicLengthSchema } from './any.js';
 
@@ -61,6 +64,30 @@ class ArraySchema<
     for (const item of value) {
       this.itemType.write(writer, item);
     }
+  }
+
+  fromByteArray(array: TypedArray): TValue[] {
+    const reader = new ArrayBufferReader(
+      array.buffer.slice(array.byteOffset, array.byteOffset + array.byteLength),
+    );
+    return this.read(reader, { byteLength: array.byteLength });
+  }
+
+  toByteArray(value: TValue[]): Uint8Array {
+    const length = this.getByteLength(value);
+    const array = new Uint8Array(length);
+    const writer = new ArrayBufferWriter(array.buffer);
+
+    this.write(writer, value);
+    return array;
+  }
+
+  fromArrayBuffer(buffer: ArrayBuffer): TValue[] {
+    return this.fromByteArray(new Uint8Array(buffer));
+  }
+
+  toArrayBuffer(value: TValue[]): ArrayBuffer {
+    return this.toByteArray(value).buffer;
   }
 }
 
