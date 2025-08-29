@@ -1,3 +1,5 @@
+import { EbinContext } from '../context.js';
+import { fromFloat16, IS_FP16_SUPPORTED, toFloat16 } from '../utils/float16.js';
 import { ConstantSizeSchema, SchemaWithEndianness } from './any.js';
 
 class NumberSchema<T extends bigint | number> extends SchemaWithEndianness<T> {
@@ -13,6 +15,26 @@ class NumberSchema<T extends bigint | number> extends SchemaWithEndianness<T> {
 
   protected generateFn() {
     const hasEndianness = typeof this._littleEndian !== 'undefined';
+
+    if (this.viewSuffix === 'Float16' && !IS_FP16_SUPPORTED) {
+      this.read = ((ctx: EbinContext) => {
+        const offset = ctx.offset;
+        ctx.offset += 2;
+        return fromFloat16(
+          ctx.view.getUint16(offset, this._littleEndian ?? ctx.littleEndian),
+        );
+      }) as any;
+      this.write = ((ctx: EbinContext, value: number) => {
+        const offset = ctx.offset;
+        ctx.offset += 2;
+        ctx.view.setUint16(
+          offset,
+          toFloat16(value),
+          this._littleEndian ?? ctx.littleEndian,
+        );
+      }) as any;
+      return;
+    }
 
     this.read = new Function(
       'ctx',
