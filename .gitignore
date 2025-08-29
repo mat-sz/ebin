@@ -8,3 +8,7 @@ yarn-error.log*
 
 coverage
 *.cpuprofile
+.yarn
+
+packages/ebin/README.md
+TODO
