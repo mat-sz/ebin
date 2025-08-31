@@ -60,4 +60,20 @@ describe('arrayBuffer', () => {
       ).toEqual(new Uint8Array([0xff, 0xee, 0xdd, 0xcc]).buffer);
     });
   });
+
+  describe('greedy', () => {
+    const testStruct = e.arrayBuffer();
+
+    it('should serialize correctly', () => {
+      expect(
+        testStruct.toByteArray(new Uint8Array([0xff, 0xee, 0xdd, 0xcc]).buffer),
+      ).toEqual(new Uint8Array([0xff, 0xee, 0xdd, 0xcc]));
+    });
+
+    it('should parse correctly', () => {
+      expect(
+        testStruct.fromByteArray(new Uint8Array([0xff, 0xee, 0xdd, 0xcc])),
+      ).toEqual(new Uint8Array([0xff, 0xee, 0xdd, 0xcc]).buffer);
+    });
+  });
 });

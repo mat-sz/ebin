@@ -35,10 +35,8 @@ export abstract class BaseBytesSchema<T> extends AnySchema<T> {
   }
 
   protected readBuffer(ctx: EbinContext, parent?: any): ArrayBuffer {
-    const size = this._sizeLookup?.read(ctx, parent);
-    if (typeof size !== 'number') {
-      throw new Error('Invalid size');
-    }
+    const size =
+      this._sizeLookup?.read(ctx, parent) ?? ctx.view.byteLength - ctx.offset;
 
     const offset = ctx.offset;
     ctx.offset += size;

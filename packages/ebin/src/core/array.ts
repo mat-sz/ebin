@@ -48,36 +48,39 @@ export class ArraySchema<
     return this._prefixSize + this.getArraySize(value);
   }
 
+  private readArray(ctx: EbinContext, parent?: any) {
+    if (this._countLookup) {
+      const count = this._countLookup.read(ctx, parent);
+      const items: TValue[] = new Array(count);
+      for (let i = 0; i < count; i++) {
+        items[i] = this.itemType.read(ctx);
+      }
+
+      return items;
+    } else {
+      const size =
+        this._sizeLookup?.read(ctx, parent) ?? ctx.view.byteLength - ctx.offset;
+
+      const offset = ctx.offset;
+      const items: TValue[] = [];
+
+      while (ctx.offset - offset < size) {
+        items.push(this.itemType.read(ctx));
+      }
+
+      return items;
+    }
+  }
+
   read(ctx: EbinContext, parent?: any): TValue[] {
     const littleEndian = ctx.littleEndian;
     if (typeof this._littleEndian !== 'undefined') {
       ctx.littleEndian = this._littleEndian;
     }
 
-    const size = this._sizeLookup?.read(ctx, parent);
-    const count = this._countLookup?.read(ctx, parent);
-
-    if (typeof size === 'number') {
-      const items: TValue[] = [];
-      const startOffset = ctx.offset;
-
-      while (ctx.offset - startOffset < size) {
-        items.push(this.itemType.read(ctx));
-      }
-
-      ctx.littleEndian = littleEndian;
-      return items;
-    } else if (typeof count === 'number') {
-      const items: TValue[] = new Array(count);
-      for (let i = 0; i < count; i++) {
-        items[i] = this.itemType.read(ctx);
-      }
-
-      ctx.littleEndian = littleEndian;
-      return items;
-    }
-
-    throw new Error('Either count or size must be provided.');
+    const output = this.readArray(ctx, parent);
+    ctx.littleEndian = littleEndian;
+    return output;
   }
 
   write(ctx: EbinContext, value: TValue[]): void {
@@ -98,12 +101,21 @@ export class ArraySchema<
 
   count(field: NumberLookupFieldParamType): this {
     this._countLookup = createNumberLookupField(field);
+    this._sizeLookup = undefined;
     this.updatePrefixSize();
     return this;
   }
 
   size(field: NumberLookupFieldParamType): this {
     this._sizeLookup = createNumberLookupField(field);
+    this._countLookup = undefined;
+    this.updatePrefixSize();
+    return this;
+  }
+
+  greedy(): this {
+    this._sizeLookup = undefined;
+    this._countLookup = undefined;
     this.updatePrefixSize();
     return this;
   }
