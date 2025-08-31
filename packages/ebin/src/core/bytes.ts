@@ -1,60 +1,41 @@
 import { EbinContext } from '../context.js';
 import { TypedArray } from '../types.js';
+import {
+  createNumberLookupField,
+  LookupField,
+  NumberLookupFieldParamType,
+} from '../utils/lookupField.js';
 import { AnySchema } from './any.js';
 
 export abstract class BaseBytesSchema<T> extends AnySchema<T> {
   isConstantSize = false;
-  sizeField?: string;
-  sizeSchema?: AnySchema<number>;
-  fixedSize?: number;
+  private _sizeLookup?: LookupField<number>;
 
   get dependsOnParent() {
-    return !!this.sizeField;
+    return !!this._sizeLookup?.dependsOnParent;
   }
 
   protected getBufferSize(value: ArrayBufferLike | TypedArray) {
-    return (
-      this.fixedSize ?? (this.sizeSchema?.getSize() ?? 0) + value.byteLength
-    );
-  }
-
-  size(field: string | number | AnySchema<number>): this {
-    this.sizeSchema = undefined;
-    this.sizeField = undefined;
-    this.fixedSize = undefined;
-    this.isConstantSize = false;
-
-    switch (typeof field) {
-      case 'string':
-        this.sizeField = field;
-        break;
-      case 'number':
-        this.fixedSize = field;
-        this.isConstantSize = true;
-        break;
-      default:
-        this.sizeSchema = field;
+    if (!this._sizeLookup) {
+      return value.byteLength;
     }
 
+    if (this._sizeLookup.isConstant) {
+      // TODO: Fix.
+      return this._sizeLookup.read(undefined as any);
+    }
+
+    return this._sizeLookup.size + value.byteLength;
+  }
+
+  size(field: NumberLookupFieldParamType): this {
+    this._sizeLookup = createNumberLookupField(field);
+    this.isConstantSize = this._sizeLookup.isConstant;
     return this;
   }
 
-  private readSize(ctx: EbinContext, parent?: any) {
-    if (this.fixedSize) {
-      return this.fixedSize;
-    }
-
-    if (this.sizeField) {
-      return parent?.[this.sizeField!];
-    }
-
-    if (this.sizeSchema) {
-      return this.sizeSchema.read(ctx, parent);
-    }
-  }
-
   protected readBuffer(ctx: EbinContext, parent?: any): ArrayBuffer {
-    const size = this.readSize(ctx, parent);
+    const size = this._sizeLookup?.read(ctx, parent);
     if (typeof size !== 'number') {
       throw new Error('Invalid size');
     }
@@ -65,16 +46,15 @@ export abstract class BaseBytesSchema<T> extends AnySchema<T> {
   }
 
   protected writeBuffer(ctx: EbinContext, value: ArrayBufferLike): void {
-    this.sizeSchema?.write(ctx, value.byteLength);
+    this._sizeLookup?.write?.(ctx, value.byteLength);
+
     const array = new Uint8Array(ctx.view.buffer);
     array.set(new Uint8Array(value), ctx.offset);
     ctx.offset += value.byteLength;
   }
 
   preWrite(value: T, parent: any) {
-    if (this.sizeField) {
-      parent[this.sizeField] = this.getSize(value);
-    }
+    this._sizeLookup?.preWrite?.(this.getSize(value, parent), parent);
   }
 }
 

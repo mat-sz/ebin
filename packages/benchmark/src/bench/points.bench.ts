@@ -11,7 +11,6 @@ import Struct from 'structron';
 // ebin
 const EbinPoints = e
   .struct({
-    length: e.uint32(),
     points: e
       .array(
         e.struct({
@@ -20,7 +19,7 @@ const EbinPoints = e
           z: e.uint16(),
         }),
       )
-      .count('length'),
+      .count(e.uint32()),
   })
   .littleEndian();
 

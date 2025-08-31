@@ -10,6 +10,14 @@ const testArrayCount = e.struct({
   array: e.array(e.uint16()).count('test'),
 });
 
+const testArraySizePrefix = e.struct({
+  array: e.array(e.uint16()).size(e.uint16()),
+});
+
+const testArrayCountPrefix = e.struct({
+  array: e.array(e.uint16()).count(e.uint16()),
+});
+
 describe('array', () => {
   describe('with size', () => {
     it('should serialize binary data', () => {
@@ -41,6 +49,42 @@ describe('array', () => {
       ).toEqual({
         array: [1, 2, 3],
         test: 3,
+      });
+    });
+  });
+
+  describe('with size prefix', () => {
+    it('should serialize binary data', () => {
+      expect(testArraySizePrefix.toByteArray({ array: [1, 2, 3] })).toEqual(
+        new Uint8Array([0, 6, 0, 1, 0, 2, 0, 3]),
+      );
+    });
+
+    it('should parse binary data', () => {
+      expect(
+        testArraySizePrefix.fromByteArray(
+          new Uint8Array([0, 6, 0, 1, 0, 2, 0, 3]),
+        ),
+      ).toEqual({
+        array: [1, 2, 3],
+      });
+    });
+  });
+
+  describe('with count prefix', () => {
+    it('should serialize binary data', () => {
+      expect(testArrayCountPrefix.toByteArray({ array: [1, 2, 3] })).toEqual(
+        new Uint8Array([0, 3, 0, 1, 0, 2, 0, 3]),
+      );
+    });
+
+    it('should parse binary data', () => {
+      expect(
+        testArrayCountPrefix.fromByteArray(
+          new Uint8Array([0, 3, 0, 1, 0, 2, 0, 3]),
+        ),
+      ).toEqual({
+        array: [1, 2, 3],
       });
     });
   });
