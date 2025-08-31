@@ -4,6 +4,7 @@ export * from './bytes.js';
 export * from './codec.js';
 export * from './match.js';
 export * from './number.js';
+export * from './pad.js';
 export * from './skip.js';
 export * from './string.js';
 export * from './struct.js';
