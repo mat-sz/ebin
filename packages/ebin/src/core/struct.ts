@@ -1,13 +1,24 @@
-import { BaseSchema, StructFields, ObjectType } from '../types.js';
+import {
+  BaseSchema,
+  ExcludeMatchingProperties,
+  SchemaValue,
+} from '../types.js';
 import { SchemaWithEndianness } from './any.js';
 
-type StructObject<TFields extends StructFields> = {
-  [K in keyof TFields]?: any;
-};
+type StructFields = Record<string, BaseSchema<any>>;
+
+type StructObject<S extends StructFields> = Partial<
+  ExcludeMatchingProperties<
+    {
+      [K in keyof S]: SchemaValue<S[K]>;
+    },
+    never
+  >
+>;
 
 class StructSchema<
   TFields extends StructFields,
-  TObject extends StructObject<TFields> = ObjectType<TFields>,
+  TObject = StructObject<TFields>,
 > extends SchemaWithEndianness<TObject> {
   isConstantSize = false;
   private fieldEntries;

@@ -1,5 +1,5 @@
 import { EbinContext } from '../context.js';
-import { BaseSchema, Infer } from '../types.js';
+import { BaseSchema, SchemaValue } from '../types.js';
 import { AnySchema } from './any.js';
 
 interface CodecSchemaOptions<TDecoded, TEncoded> {
@@ -10,7 +10,7 @@ interface CodecSchemaOptions<TDecoded, TEncoded> {
 class CodecSchema<
   TDecoded,
   TEncodedSchema extends BaseSchema<any>,
-  TEncoded = Infer<TEncodedSchema>,
+  TEncoded = SchemaValue<TEncodedSchema>,
 > extends AnySchema<TDecoded> {
   isConstantSize = false;
 
@@ -42,7 +42,7 @@ class CodecSchema<
 export function codec<
   TDecoded,
   TEncodedSchema extends BaseSchema<any>,
-  TEncoded = Infer<TEncodedSchema>,
+  TEncoded = SchemaValue<TEncodedSchema>,
 >(
   inputSchema: TEncodedSchema,
   options: CodecSchemaOptions<TDecoded, TEncoded>,

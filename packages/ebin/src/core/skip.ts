@@ -1,10 +1,10 @@
 import { EbinContext } from '../context.js';
 import { ConstantSizeSchema } from './any.js';
 
-class SkipSchema extends ConstantSizeSchema<undefined> {
+class SkipSchema extends ConstantSizeSchema<never> {
   read(ctx: EbinContext) {
     ctx.offset += this.size;
-    return undefined;
+    return undefined as never;
   }
 
   write(ctx: EbinContext) {

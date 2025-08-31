@@ -1,10 +1,10 @@
 import { EbinContext } from '../context.js';
-import { BaseSchema, Infer } from '../types.js';
+import { BaseSchema, SchemaValue } from '../types.js';
 import { SchemaWithEndianness } from './any.js';
 
 export class ArraySchema<
   TItemSchema extends BaseSchema<any>,
-  TValue = Infer<TItemSchema>,
+  TValue = SchemaValue<TItemSchema>,
 > extends SchemaWithEndianness<TValue[]> {
   countField?: string;
   sizeField?: string;

@@ -26,14 +26,9 @@ export type TypedArray =
   | BigInt64Array
   | BigUint64Array;
 
-export type StructFields = Record<string, BaseSchema<any>>;
+export type SchemaValue<T extends BaseSchema<any>> = T['TYPE'];
 
-export type Infer<T extends BaseSchema<any>> = T['TYPE'];
-
-export type Simplify<T> = T extends any[] | Date
-  ? T
-  : { [K in keyof T]: T[K] } & {};
-
-export type ObjectType<S extends StructFields> = Simplify<{
-  [K in keyof S]?: Infer<S[K]>;
-}>;
+export type ExcludeMatchingProperties<T, V> = Pick<
+  T,
+  { [K in keyof T]-?: T[K] extends V ? never : K }[keyof T]
+>;

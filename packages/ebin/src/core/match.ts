@@ -1,5 +1,5 @@
 import { EbinContext } from '../context.js';
-import { Infer } from '../types.js';
+import { SchemaValue } from '../types.js';
 import { AnySchema } from './any.js';
 
 type MatchCases<TSchema extends AnySchema<any>> = Record<string, TSchema>;
@@ -8,7 +8,7 @@ type MatchObject<T extends MatchCases<any>> =
 
 class MatchSchema<
   TCases extends MatchCases<any>,
-  TObject = Infer<MatchObject<TCases>>,
+  TObject = SchemaValue<MatchObject<TCases>>,
 > extends AnySchema<TObject> {
   isConstantSize = false;
 
