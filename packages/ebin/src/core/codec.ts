@@ -14,6 +14,10 @@ class CodecSchema<
 > extends AnySchema<TDecoded> {
   isConstantSize = false;
 
+  get dependsOnParent() {
+    return this.encodedSchema.dependsOnParent;
+  }
+
   constructor(
     private encodedSchema: TEncodedSchema,
     private options: CodecSchemaOptions<TDecoded, TEncoded>,
@@ -22,20 +26,24 @@ class CodecSchema<
     this.isConstantSize = encodedSchema.isConstantSize;
   }
 
-  getSize(value: TDecoded) {
+  getSize(value: TDecoded, parent?: any) {
     if (this.isConstantSize) {
       return this.encodedSchema.getSize();
     }
 
-    return this.encodedSchema.getSize(this.options.encode(value));
+    return this.encodedSchema.getSize(this.options.encode(value), parent);
   }
 
   read(ctx: EbinContext, parent?: any) {
     return this.options.decode(this.encodedSchema.read(ctx, parent));
   }
 
-  write(ctx: EbinContext, value: TDecoded) {
-    return this.encodedSchema.write(ctx, this.options.encode(value));
+  write(ctx: EbinContext, value: TDecoded, parent?: any) {
+    return this.encodedSchema.write(ctx, this.options.encode(value), parent);
+  }
+
+  preWrite(value: TDecoded, parent: any) {
+    this.encodedSchema.preWrite?.(this.options.encode(value), parent);
   }
 }
 
