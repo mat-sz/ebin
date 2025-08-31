@@ -50,7 +50,7 @@ class NumberSchema<T extends bigint | number> extends SchemaWithEndianness<T> {
       `"use strict";
       const offset = ctx.offset;
       ctx.offset += ${this.size};
-      return ctx.view.set${this.viewSuffix}(offset, value, ${hasEndianness ? JSON.stringify(this._littleEndian) : `ctx.littleEndian`});
+      ctx.view.set${this.viewSuffix}(offset, value, ${hasEndianness ? JSON.stringify(this._littleEndian) : `ctx.littleEndian`});
       `,
     ).bind(this);
   }

@@ -18,6 +18,10 @@ const testArrayCountPrefix = e.struct({
   array: e.array(e.uint16()).count(e.uint16()),
 });
 
+const testArrayLittleEndian = e.struct({
+  array: e.array(e.uint16()).count(e.uint16()).littleEndian(),
+});
+
 describe('array', () => {
   describe('with size', () => {
     it('should serialize binary data', () => {
@@ -82,6 +86,24 @@ describe('array', () => {
       expect(
         testArrayCountPrefix.fromByteArray(
           new Uint8Array([0, 3, 0, 1, 0, 2, 0, 3]),
+        ),
+      ).toEqual({
+        array: [1, 2, 3],
+      });
+    });
+  });
+
+  describe('with count prefix (little endian)', () => {
+    it('should serialize binary data', () => {
+      expect(testArrayLittleEndian.toByteArray({ array: [1, 2, 3] })).toEqual(
+        new Uint8Array([3, 0, 1, 0, 2, 0, 3, 0]),
+      );
+    });
+
+    it('should parse binary data', () => {
+      expect(
+        testArrayLittleEndian.fromByteArray(
+          new Uint8Array([3, 0, 1, 0, 2, 0, 3, 0]),
         ),
       ).toEqual({
         array: [1, 2, 3],

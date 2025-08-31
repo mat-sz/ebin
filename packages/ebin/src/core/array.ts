@@ -49,6 +49,11 @@ export class ArraySchema<
   }
 
   read(ctx: EbinContext, parent?: any): TValue[] {
+    const littleEndian = ctx.littleEndian;
+    if (typeof this._littleEndian !== 'undefined') {
+      ctx.littleEndian = this._littleEndian;
+    }
+
     const size = this._sizeLookup?.read(ctx, parent);
     const count = this._countLookup?.read(ctx, parent);
 
@@ -59,12 +64,16 @@ export class ArraySchema<
       while (ctx.offset - startOffset < size) {
         items.push(this.itemType.read(ctx));
       }
+
+      ctx.littleEndian = littleEndian;
       return items;
     } else if (typeof count === 'number') {
       const items: TValue[] = new Array(count);
       for (let i = 0; i < count; i++) {
         items[i] = this.itemType.read(ctx);
       }
+
+      ctx.littleEndian = littleEndian;
       return items;
     }
 
@@ -72,12 +81,19 @@ export class ArraySchema<
   }
 
   write(ctx: EbinContext, value: TValue[]): void {
+    const littleEndian = ctx.littleEndian;
+    if (typeof this._littleEndian !== 'undefined') {
+      ctx.littleEndian = this._littleEndian;
+    }
+
     this._sizeLookup?.write?.(ctx, this.getArraySize(value));
     this._countLookup?.write?.(ctx, value.length);
 
     for (let i = 0; i < value.length; i++) {
       this.itemType.write(ctx, value[i]);
     }
+
+    ctx.littleEndian = littleEndian;
   }
 
   count(field: NumberLookupFieldParamType): this {
