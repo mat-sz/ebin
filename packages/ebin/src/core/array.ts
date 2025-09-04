@@ -1,8 +1,7 @@
 import { EbinContext } from '../context.js';
-import { BaseSchema, SchemaValue } from '../types.js';
+import { BaseSchema, LookupField, SchemaValue } from '../types.js';
 import {
   createNumberLookupField,
-  LookupField,
   NumberLookupFieldParamType,
 } from '../utils/lookupField.js';
 import { SchemaWithEndianness } from './any.js';
@@ -11,21 +10,17 @@ export class ArraySchema<
   TItemSchema extends BaseSchema<any>,
   TValue = SchemaValue<TItemSchema>,
 > extends SchemaWithEndianness<TValue[]> {
-  private _countLookup?: LookupField<number>;
-  private _sizeLookup?: LookupField<number>;
+  lookups: {
+    size?: LookupField<number>;
+    count?: LookupField<number>;
+  } = {};
 
   private _prefixSize: number = 0;
 
   get isConstantSize() {
     return !!(
-      this._sizeLookup?.isConstant ||
-      (this._countLookup?.isConstant && this.itemType.isConstantSize)
-    );
-  }
-
-  get dependsOnParent() {
-    return !!(
-      this._countLookup?.dependsOnParent || this._sizeLookup?.dependsOnParent
+      this.lookups.size?.isConstant ||
+      (this.lookups.count?.isConstant && this.itemType.isConstantSize)
     );
   }
 
@@ -49,8 +44,9 @@ export class ArraySchema<
   }
 
   private readArray(ctx: EbinContext, parent?: any) {
-    if (this._countLookup) {
-      const count = this._countLookup.read(ctx, parent);
+    const countLookup = this.lookups.count;
+    if (countLookup) {
+      const count = countLookup.read(ctx, parent);
       const items: TValue[] = new Array(count);
       for (let i = 0; i < count; i++) {
         items[i] = this.itemType.read(ctx);
@@ -59,7 +55,8 @@ export class ArraySchema<
       return items;
     } else {
       const size =
-        this._sizeLookup?.read(ctx, parent) ?? ctx.view.byteLength - ctx.offset;
+        this.lookups.size?.read(ctx, parent) ??
+        ctx.view.byteLength - ctx.offset;
 
       const offset = ctx.offset;
       const items: TValue[] = [];
@@ -89,8 +86,8 @@ export class ArraySchema<
       ctx.littleEndian = this._littleEndian;
     }
 
-    this._sizeLookup?.write?.(ctx, this.getArraySize(value));
-    this._countLookup?.write?.(ctx, value.length);
+    this.lookups.size?.write?.(ctx, this.getArraySize(value));
+    this.lookups.count?.write?.(ctx, value.length);
 
     for (let i = 0; i < value.length; i++) {
       this.itemType.write(ctx, value[i]);
@@ -100,34 +97,35 @@ export class ArraySchema<
   }
 
   count(field: NumberLookupFieldParamType): this {
-    this._countLookup = createNumberLookupField(field);
-    this._sizeLookup = undefined;
+    this.lookups = {
+      count: createNumberLookupField(field),
+    };
     this.updatePrefixSize();
     return this;
   }
 
   size(field: NumberLookupFieldParamType): this {
-    this._sizeLookup = createNumberLookupField(field);
-    this._countLookup = undefined;
+    this.lookups = {
+      size: createNumberLookupField(field),
+    };
     this.updatePrefixSize();
     return this;
   }
 
   greedy(): this {
-    this._sizeLookup = undefined;
-    this._countLookup = undefined;
+    this.lookups = {};
     this.updatePrefixSize();
     return this;
   }
 
   private updatePrefixSize() {
     this._prefixSize =
-      (this._sizeLookup?.size ?? 0) + (this._countLookup?.size ?? 0);
+      (this.lookups.size?.size ?? 0) + (this.lookups.count?.size ?? 0);
   }
 
   preWrite(value: TValue[], parent: any) {
-    this._sizeLookup?.preWrite?.(this.getArraySize(value), parent);
-    this._countLookup?.preWrite?.(value.length, parent);
+    this.lookups.size?.preWrite?.(this.getArraySize(value), parent);
+    this.lookups.count?.preWrite?.(value.length, parent);
   }
 }
 

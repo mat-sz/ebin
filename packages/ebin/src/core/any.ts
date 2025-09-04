@@ -4,9 +4,6 @@ import type { BaseSchema, TypedArray } from '../types.js';
 export abstract class AnySchema<T> implements BaseSchema<T> {
   readonly TYPE!: T;
   abstract get isConstantSize(): boolean;
-  get dependsOnParent() {
-    return false;
-  }
 
   defaultValue?: T;
 

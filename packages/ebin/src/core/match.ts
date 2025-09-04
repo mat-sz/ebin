@@ -1,8 +1,9 @@
 import { EbinContext } from '../context.js';
-import { SchemaValue } from '../types.js';
+import { BaseSchema, SchemaValue } from '../types.js';
+import { LookupFieldParent } from '../utils/lookupField.js';
 import { AnySchema } from './any.js';
 
-type MatchCases<TSchema extends AnySchema<any>> = Record<string, TSchema>;
+type MatchCases<TSchema extends BaseSchema<any>> = Record<string, TSchema>;
 type MatchObject<T extends MatchCases<any>> =
   T extends MatchCases<infer U> ? U : never;
 
@@ -11,28 +12,32 @@ class MatchSchema<
   TObject = SchemaValue<MatchObject<TCases>>,
 > extends AnySchema<TObject> {
   isConstantSize = false;
-
-  get dependsOnParent() {
-    return true;
-  }
+  lookups;
 
   constructor(
     readonly matchField: string,
     readonly cases: TCases,
   ) {
     super();
+    this.lookups = {
+      match: new LookupFieldParent<number>(matchField),
+    };
   }
 
   getSize(value: TObject, parent?: any) {
-    return this.cases[parent[this.matchField]].getSize(value, parent);
+    // TODO: Fix.
+    const matchValue = this.lookups.match.read(undefined as any, parent);
+    return this.cases[matchValue].getSize(value, parent);
   }
 
   read(ctx: EbinContext, parent?: any) {
-    return this.cases[parent[this.matchField]].read(ctx, parent);
+    const matchValue = this.lookups.match.read(ctx, parent);
+    return this.cases[matchValue].read(ctx, parent);
   }
 
   write(ctx: EbinContext, value: TObject, parent?: any) {
-    this.cases[parent[this.matchField]].write(ctx, value, parent);
+    const matchValue = this.lookups.match.read(ctx, parent);
+    this.cases[matchValue].write(ctx, value, parent);
   }
 }
 

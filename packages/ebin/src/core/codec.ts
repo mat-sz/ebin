@@ -14,8 +14,8 @@ class CodecSchema<
 > extends AnySchema<TDecoded> {
   isConstantSize = false;
 
-  get dependsOnParent() {
-    return this.encodedSchema.dependsOnParent;
+  get lookups() {
+    return this.encodedSchema.lookups;
   }
 
   constructor(

@@ -1,15 +1,25 @@
 import type { EbinContext } from './context.js';
 
+export interface LookupField<T> {
+  readonly size: number;
+  readonly isConstant: boolean;
+  readonly parentField?: string;
+
+  read(ctx: EbinContext, parent?: any): T;
+  write?: (ctx: EbinContext, value: T, parent?: any) => void;
+  preWrite?: (value: T, parent: any) => void;
+}
+
 export interface BaseSchema<T = any> {
   readonly TYPE: T;
   readonly isConstantSize: boolean;
-  readonly dependsOnParent: boolean;
+  readonly lookups?: Record<string, LookupField<any> | undefined>;
   defaultValue?: T;
 
-  getSize(value?: T): number;
+  getSize(value?: T, parent?: any): number;
 
   read(ctx: EbinContext, parent?: any): T;
-  write(ctx: EbinContext, value: T): void;
+  write(ctx: EbinContext, value: T, parent?: any): void;
   preWrite?(value: T, parent: any): void;
 }
 

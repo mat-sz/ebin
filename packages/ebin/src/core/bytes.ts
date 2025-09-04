@@ -1,42 +1,41 @@
 import { EbinContext } from '../context.js';
-import { TypedArray } from '../types.js';
+import { LookupField, TypedArray } from '../types.js';
 import {
   createNumberLookupField,
-  LookupField,
   NumberLookupFieldParamType,
 } from '../utils/lookupField.js';
 import { AnySchema } from './any.js';
 
 export abstract class BaseBytesSchema<T> extends AnySchema<T> {
   isConstantSize = false;
-  private _sizeLookup?: LookupField<number>;
-
-  get dependsOnParent() {
-    return !!this._sizeLookup?.dependsOnParent;
-  }
+  lookups: {
+    size?: LookupField<number>;
+  } = {};
 
   protected getBufferSize(value: ArrayBufferLike | TypedArray) {
-    if (!this._sizeLookup) {
+    const sizeLookup = this.lookups.size;
+    if (!sizeLookup?.size) {
       return value.byteLength;
     }
 
-    if (this._sizeLookup.isConstant) {
+    if (sizeLookup.isConstant) {
       // TODO: Fix.
-      return this._sizeLookup.read(undefined as any);
+      return sizeLookup.read(undefined as any);
     }
 
-    return this._sizeLookup.size + value.byteLength;
+    return sizeLookup.size + value.byteLength;
   }
 
   size(field: NumberLookupFieldParamType): this {
-    this._sizeLookup = createNumberLookupField(field);
-    this.isConstantSize = this._sizeLookup.isConstant;
+    const sizeLookup = createNumberLookupField(field);
+    this.lookups.size = sizeLookup;
+    this.isConstantSize = sizeLookup.isConstant;
     return this;
   }
 
   protected readBuffer(ctx: EbinContext, parent?: any): ArrayBuffer {
     const size =
-      this._sizeLookup?.read(ctx, parent) ?? ctx.view.byteLength - ctx.offset;
+      this.lookups.size?.read(ctx, parent) ?? ctx.view.byteLength - ctx.offset;
 
     const offset = ctx.offset;
     ctx.offset += size;
@@ -44,7 +43,7 @@ export abstract class BaseBytesSchema<T> extends AnySchema<T> {
   }
 
   protected writeBuffer(ctx: EbinContext, value: ArrayBufferLike): void {
-    this._sizeLookup?.write?.(ctx, value.byteLength);
+    this.lookups.size?.write?.(ctx, value.byteLength);
 
     const array = new Uint8Array(ctx.view.buffer);
     array.set(new Uint8Array(value), ctx.offset);
@@ -52,7 +51,7 @@ export abstract class BaseBytesSchema<T> extends AnySchema<T> {
   }
 
   preWrite(value: T, parent: any) {
-    this._sizeLookup?.preWrite?.(this.getSize(value, parent), parent);
+    this.lookups.size?.preWrite?.(this.getSize(value, parent), parent);
   }
 }
 

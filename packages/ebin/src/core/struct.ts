@@ -32,7 +32,9 @@ class StructSchema<
 
   protected generateFn() {
     const hasParentDependencies = this.fieldEntries.some(
-      ([_, field]) => field.dependsOnParent,
+      ([_, field]) =>
+        field.lookups &&
+        Object.values(field.lookups).some(lookup => lookup?.parentField),
     );
     const hasEndianness = typeof this._littleEndian !== 'undefined';
     const constantSizeFields = this.fieldEntries.filter(

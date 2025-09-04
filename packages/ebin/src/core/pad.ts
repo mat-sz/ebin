@@ -1,9 +1,10 @@
 import { EbinContext } from '../context.js';
+import { BaseSchema } from '../types.js';
 import { AnySchema } from './any.js';
 
 class PadSchema<T> extends AnySchema<T> {
   constructor(
-    private itemType: AnySchema<T>,
+    private itemType: BaseSchema<T>,
     private blockSize: number,
   ) {
     super();
@@ -13,8 +14,8 @@ class PadSchema<T> extends AnySchema<T> {
     return this.itemType.isConstantSize;
   }
 
-  get dependsOnParent() {
-    return this.itemType.dependsOnParent;
+  get lookups() {
+    return this.itemType.lookups;
   }
 
   read(ctx: EbinContext, parent?: any) {
@@ -43,7 +44,7 @@ class PadSchema<T> extends AnySchema<T> {
 }
 
 export function pad<T>(
-  itemType: AnySchema<T>,
+  itemType: BaseSchema<T>,
   blockSize: number,
 ): PadSchema<T> {
   return new PadSchema(itemType, blockSize);

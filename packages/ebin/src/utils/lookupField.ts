@@ -1,29 +1,19 @@
 import { EbinContext } from '../context.js';
-import { AnySchema } from '../core/any.js';
-
-export interface LookupField<T> {
-  readonly dependsOnParent: boolean;
-  readonly size: number;
-  readonly isConstant: boolean;
-
-  read(ctx: EbinContext, parent?: any): T;
-  write?: (ctx: EbinContext, value: T, parent?: any) => void;
-  preWrite?: (value: T, parent: any) => void;
-}
+import { BaseSchema, LookupField } from '../types.js';
 
 export class LookupFieldParent<T> implements LookupField<T> {
   readonly dependsOnParent = true;
   readonly size = 0;
   readonly isConstant = false;
 
-  constructor(private field: string) {}
+  constructor(public readonly parentField: string) {}
 
   read(_: EbinContext, parent?: any) {
-    return parent?.[this.field];
+    return parent?.[this.parentField];
   }
 
   preWrite(value: T, parent: any) {
-    parent[this.field] = value;
+    parent[this.parentField] = value;
   }
 }
 
@@ -44,7 +34,7 @@ export class LookupFieldPrefix<T> implements LookupField<T> {
   size = 0;
   readonly isConstant = false;
 
-  constructor(private schema: AnySchema<T>) {
+  constructor(private schema: BaseSchema<T>) {
     this.size = schema.getSize();
   }
 
@@ -57,7 +47,7 @@ export class LookupFieldPrefix<T> implements LookupField<T> {
   }
 }
 
-export type NumberLookupFieldParamType = string | number | AnySchema<number>;
+export type NumberLookupFieldParamType = string | number | BaseSchema<number>;
 
 export function createNumberLookupField(
   field: NumberLookupFieldParamType,
