@@ -1,24 +1,18 @@
 import * as e from '../../src/index.js';
+import { runTestCases, TestCase } from '../testUtils.js';
 
-const testStruct = e.struct({
-  test1: e.uint16(),
-  test2: e.skip(4),
-  test3: e.uint16(),
-});
+const TEST_CASES: TestCase<any>[] = [
+  {
+    label: 'constant size',
+    schema: e.struct({
+      test1: e.uint16(),
+      test2: e.skip(4),
+      test3: e.uint16(),
+    }),
+    tests: [
+      { decoded: { test1: 1, test3: 1 }, encoded: [0, 1, 0, 0, 0, 0, 0, 1] },
+    ],
+  },
+];
 
-describe('skip', () => {
-  it('should serialize binary data', () => {
-    expect(testStruct.toByteArray({ test1: 1, test3: 1 })).toEqual(
-      new Uint8Array([0, 1, 0, 0, 0, 0, 0, 1]),
-    );
-  });
-
-  it('should parse binary data', () => {
-    expect(
-      testStruct.fromByteArray(new Uint8Array([0, 1, 0, 1, 1, 0, 0, 1])),
-    ).toEqual({
-      test1: 1,
-      test3: 1,
-    });
-  });
-});
+describe('skip', () => runTestCases(TEST_CASES));

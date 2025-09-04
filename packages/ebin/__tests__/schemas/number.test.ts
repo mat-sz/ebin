@@ -1,190 +1,297 @@
-import { AnySchema } from '../../src/core/any.js';
 import * as e from '../../src/index.js';
+import { runTestCases, TestCase } from '../testUtils.js';
 
-const TEST_CASES: {
-  name: string;
-  type: AnySchema<any>;
-  value: number | bigint;
-  bytes: number[];
-}[] = [
-  { name: 'uint8', type: e.uint8(), value: 255, bytes: [0xff] },
-  { name: 'int8', type: e.int8(), value: -1, bytes: [0xff] },
+const TEST_CASES: TestCase<any>[] = [
   {
-    name: 'uint16 - default (BE)',
-    type: e.uint16(),
-    value: 61681,
-    bytes: [0xf0, 0xf1],
+    label: 'uint8',
+    schema: e.uint8(),
+    tests: [
+      {
+        decoded: 255,
+        encoded: [0xff],
+      },
+    ],
   },
   {
-    name: 'int16 - default (BE)',
-    type: e.int16(),
-    value: -3855,
-    bytes: [0xf0, 0xf1],
+    label: 'int8',
+    schema: e.int8(),
+    tests: [
+      {
+        decoded: -1,
+        encoded: [0xff],
+      },
+    ],
   },
   {
-    name: 'uint16 (BE)',
-    type: e.uint16().bigEndian(),
-    value: 61681,
-    bytes: [0xf0, 0xf1],
+    label: 'uint16 - default (BE)',
+    schema: e.uint16(),
+    tests: [
+      {
+        decoded: 61681,
+        encoded: [0xf0, 0xf1],
+      },
+    ],
   },
   {
-    name: 'int16 (BE)',
-    type: e.int16().bigEndian(),
-    value: -3855,
-    bytes: [0xf0, 0xf1],
+    label: 'int16 - default (BE)',
+    schema: e.int16(),
+    tests: [
+      {
+        decoded: -3855,
+        encoded: [0xf0, 0xf1],
+      },
+    ],
   },
   {
-    name: 'uint16 (LE)',
-    type: e.uint16().littleEndian(),
-    value: 61681,
-    bytes: [0xf1, 0xf0],
+    label: 'uint16 (BE)',
+    schema: e.uint16().bigEndian(),
+    tests: [
+      {
+        decoded: 61681,
+        encoded: [0xf0, 0xf1],
+      },
+    ],
   },
   {
-    name: 'int16 (LE)',
-    type: e.int16().littleEndian(),
-    value: -3855,
-    bytes: [0xf1, 0xf0],
+    label: 'int16 (BE)',
+    schema: e.int16().bigEndian(),
+    tests: [
+      {
+        decoded: -3855,
+        encoded: [0xf0, 0xf1],
+      },
+    ],
   },
   {
-    name: 'uint32 - default (BE)',
-    type: e.uint32(),
-    value: 4042388211,
-    bytes: [0xf0, 0xf1, 0xf2, 0xf3],
+    label: 'uint16 (LE)',
+    schema: e.uint16().littleEndian(),
+    tests: [
+      {
+        decoded: 61681,
+        encoded: [0xf1, 0xf0],
+      },
+    ],
   },
   {
-    name: 'int32 - default (BE)',
-    type: e.int32(),
-    value: -252579085,
-    bytes: [0xf0, 0xf1, 0xf2, 0xf3],
+    label: 'int16 (LE)',
+    schema: e.int16().littleEndian(),
+    tests: [
+      {
+        decoded: -3855,
+        encoded: [0xf1, 0xf0],
+      },
+    ],
   },
   {
-    name: 'uint32 (BE)',
-    type: e.uint32().bigEndian(),
-    value: 4042388211,
-    bytes: [0xf0, 0xf1, 0xf2, 0xf3],
+    label: 'uint32 - default (BE)',
+    schema: e.uint32(),
+    tests: [
+      {
+        decoded: 4042388211,
+        encoded: [0xf0, 0xf1, 0xf2, 0xf3],
+      },
+    ],
   },
   {
-    name: 'int32 (BE)',
-    type: e.int32().bigEndian(),
-    value: -252579085,
-    bytes: [0xf0, 0xf1, 0xf2, 0xf3],
+    label: 'int32 - default (BE)',
+    schema: e.int32(),
+    tests: [
+      {
+        decoded: -252579085,
+        encoded: [0xf0, 0xf1, 0xf2, 0xf3],
+      },
+    ],
   },
   {
-    name: 'uint32 (LE)',
-    type: e.uint32().littleEndian(),
-    value: 4042388211,
-    bytes: [0xf3, 0xf2, 0xf1, 0xf0],
+    label: 'uint32 (BE)',
+    schema: e.uint32().bigEndian(),
+    tests: [
+      {
+        decoded: 4042388211,
+        encoded: [0xf0, 0xf1, 0xf2, 0xf3],
+      },
+    ],
   },
   {
-    name: 'int32 (LE)',
-    type: e.int32().littleEndian(),
-    value: -252579085,
-    bytes: [0xf3, 0xf2, 0xf1, 0xf0],
+    label: 'int32 (BE)',
+    schema: e.int32().bigEndian(),
+    tests: [
+      {
+        decoded: -252579085,
+        encoded: [0xf0, 0xf1, 0xf2, 0xf3],
+      },
+    ],
   },
   {
-    name: 'uint64 - default (BE)',
-    type: e.biguint64(),
-    value: 17361925168090707703n,
-    bytes: [0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7],
+    label: 'uint32 (LE)',
+    schema: e.uint32().littleEndian(),
+    tests: [
+      {
+        decoded: 4042388211,
+        encoded: [0xf3, 0xf2, 0xf1, 0xf0],
+      },
+    ],
   },
   {
-    name: 'int64 - default (BE)',
-    type: e.bigint64(),
-    value: -1084818905618843913n,
-    bytes: [0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7],
+    label: 'int32 (LE)',
+    schema: e.int32().littleEndian(),
+    tests: [
+      {
+        decoded: -252579085,
+        encoded: [0xf3, 0xf2, 0xf1, 0xf0],
+      },
+    ],
   },
   {
-    name: 'uint64 (BE)',
-    type: e.biguint64().bigEndian(),
-    value: 17361925168090707703n,
-    bytes: [0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7],
+    label: 'uint64 - default (BE)',
+    schema: e.biguint64(),
+    tests: [
+      {
+        decoded: 17361925168090707703n,
+        encoded: [0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7],
+      },
+    ],
   },
   {
-    name: 'int64 (BE)',
-    type: e.bigint64().bigEndian(),
-    value: -1084818905618843913n,
-    bytes: [0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7],
+    label: 'int64 - default (BE)',
+    schema: e.bigint64(),
+    tests: [
+      {
+        decoded: -1084818905618843913n,
+        encoded: [0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7],
+      },
+    ],
   },
   {
-    name: 'uint64 (LE)',
-    type: e.biguint64().littleEndian(),
-    value: 17361925168090707703n,
-    bytes: [0xf7, 0xf6, 0xf5, 0xf4, 0xf3, 0xf2, 0xf1, 0xf0],
+    label: 'uint64 (BE)',
+    schema: e.biguint64().bigEndian(),
+    tests: [
+      {
+        decoded: 17361925168090707703n,
+        encoded: [0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7],
+      },
+    ],
   },
   {
-    name: 'int64 (LE)',
-    type: e.bigint64().littleEndian(),
-    value: -1084818905618843913n,
-    bytes: [0xf7, 0xf6, 0xf5, 0xf4, 0xf3, 0xf2, 0xf1, 0xf0],
+    label: 'int64 (BE)',
+    schema: e.bigint64().bigEndian(),
+    tests: [
+      {
+        decoded: -1084818905618843913n,
+        encoded: [0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7],
+      },
+    ],
   },
   {
-    name: 'float16 - default (BE)',
-    type: e.float16(),
-    value: -10120,
-    bytes: [0xf0, 0xf1],
+    label: 'uint64 (LE)',
+    schema: e.biguint64().littleEndian(),
+    tests: [
+      {
+        decoded: 17361925168090707703n,
+        encoded: [0xf7, 0xf6, 0xf5, 0xf4, 0xf3, 0xf2, 0xf1, 0xf0],
+      },
+    ],
   },
   {
-    name: 'float16 (BE)',
-    type: e.float16().bigEndian(),
-    value: -10120,
-    bytes: [0xf0, 0xf1],
+    label: 'int64 (LE)',
+    schema: e.bigint64().littleEndian(),
+    tests: [
+      {
+        decoded: -1084818905618843913n,
+        encoded: [0xf7, 0xf6, 0xf5, 0xf4, 0xf3, 0xf2, 0xf1, 0xf0],
+      },
+    ],
   },
   {
-    name: 'float16 (LE)',
-    type: e.float16().littleEndian(),
-    value: -10120,
-    bytes: [0xf1, 0xf0],
+    label: 'float16 - default (BE)',
+    schema: e.float16(),
+    tests: [
+      {
+        decoded: -10120,
+        encoded: [0xf0, 0xf1],
+      },
+    ],
   },
   {
-    name: 'float32 - default (BE)',
-    type: e.float32(),
-    value: -5.990367596027699e29,
-    bytes: [0xf0, 0xf1, 0xf2, 0xf3],
+    label: 'float16 (BE)',
+    schema: e.float16().bigEndian(),
+    tests: [
+      {
+        decoded: -10120,
+        encoded: [0xf0, 0xf1],
+      },
+    ],
   },
   {
-    name: 'float32 (BE)',
-    type: e.float32().bigEndian(),
-    value: -5.990367596027699e29,
-    bytes: [0xf0, 0xf1, 0xf2, 0xf3],
+    label: 'float16 (LE)',
+    schema: e.float16().littleEndian(),
+    tests: [
+      {
+        decoded: -10120,
+        encoded: [0xf1, 0xf0],
+      },
+    ],
   },
   {
-    name: 'float32 (LE)',
-    type: e.float32().littleEndian(),
-    value: -5.990367596027699e29,
-    bytes: [0xf3, 0xf2, 0xf1, 0xf0],
+    label: 'float32 - default (BE)',
+    schema: e.float32(),
+    tests: [
+      {
+        decoded: -5.990367596027699e29,
+        encoded: [0xf0, 0xf1, 0xf2, 0xf3],
+      },
+    ],
   },
   {
-    name: 'float64 - default (BE)',
-    type: e.float64(),
-    value: -1.1413996157316056e236,
-    bytes: [0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7],
+    label: 'float32 (BE)',
+    schema: e.float32().bigEndian(),
+    tests: [
+      {
+        decoded: -5.990367596027699e29,
+        encoded: [0xf0, 0xf1, 0xf2, 0xf3],
+      },
+    ],
   },
   {
-    name: 'float64 (BE)',
-    type: e.float64().bigEndian(),
-    value: -1.1413996157316056e236,
-    bytes: [0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7],
+    label: 'float32 (LE)',
+    schema: e.float32().littleEndian(),
+    tests: [
+      {
+        decoded: -5.990367596027699e29,
+        encoded: [0xf3, 0xf2, 0xf1, 0xf0],
+      },
+    ],
   },
   {
-    name: 'float64 (LE)',
-    type: e.float64().littleEndian(),
-    value: -1.1413996157316056e236,
-    bytes: [0xf7, 0xf6, 0xf5, 0xf4, 0xf3, 0xf2, 0xf1, 0xf0],
+    label: 'float64 - default (BE)',
+    schema: e.float64(),
+    tests: [
+      {
+        decoded: -1.1413996157316056e236,
+        encoded: [0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7],
+      },
+    ],
+  },
+  {
+    label: 'float64 (BE)',
+    schema: e.float64().bigEndian(),
+    tests: [
+      {
+        decoded: -1.1413996157316056e236,
+        encoded: [0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7],
+      },
+    ],
+  },
+  {
+    label: 'float64 (LE)',
+    schema: e.float64().littleEndian(),
+    tests: [
+      {
+        decoded: -1.1413996157316056e236,
+        encoded: [0xf7, 0xf6, 0xf5, 0xf4, 0xf3, 0xf2, 0xf1, 0xf0],
+      },
+    ],
   },
 ];
 
-for (const testCase of TEST_CASES) {
-  describe(testCase.name, () => {
-    it('should serialize correctly', () => {
-      expect(testCase.type.toByteArray(testCase.value)).toEqual(
-        new Uint8Array(testCase.bytes),
-      );
-    });
-
-    it('should parse correctly', () => {
-      expect(
-        testCase.type.fromByteArray(new Uint8Array(testCase.bytes)),
-      ).toEqual(testCase.value);
-    });
-  });
-}
+describe('number', () => runTestCases(TEST_CASES));
