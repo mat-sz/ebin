@@ -60,7 +60,7 @@ class StructSchema<
       this.getSize = new Function(
         'value',
         `"use strict";
-        return ${constantSize} + ${dynamicSizeFieldKeys.map(key => `this.fields[${key}].getSize(value[${key}], value)`)};
+        return ${constantSize} + ${dynamicSizeFieldKeys.map(key => `this.fields[${key}].getSize(value[${key}], value)`).join(' + ')};
         `,
       ).bind(this);
     }

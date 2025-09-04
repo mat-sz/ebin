@@ -32,6 +32,21 @@ const TEST_CASES: TestCase<any>[] = [
       },
     ],
   },
+  {
+    label: 'dynamic size',
+    schema: e.struct({
+      test1: e.uint16(),
+      test2: e.uint16(),
+      test3: e.array(e.uint16()).count(e.uint16()),
+      test4: e.array(e.uint16()).count(e.uint16()),
+    }),
+    tests: [
+      {
+        decoded: { test1: 1, test2: 1, test3: [1, 1, 1], test4: [1, 1] },
+        encoded: [0, 1, 0, 1, 0, 3, 0, 1, 0, 1, 0, 1, 0, 2, 0, 1, 0, 1],
+      },
+    ],
+  },
 ];
 
 describe('struct', () => runTestCases(TEST_CASES));
