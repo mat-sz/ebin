@@ -2,9 +2,9 @@ import { EbinContext } from '../context.js';
 import { BaseSchema } from '../types.js';
 import { AnySchema } from './any.js';
 
-class PadSchema<T> extends AnySchema<T> {
+class PadSchema<T, TProcessed = T> extends AnySchema<T, TProcessed> {
   constructor(
-    private itemType: BaseSchema<T>,
+    private itemType: BaseSchema<T, TProcessed>,
     private blockSize: number,
   ) {
     super();
@@ -27,7 +27,7 @@ class PadSchema<T> extends AnySchema<T> {
     return output;
   }
 
-  write(ctx: EbinContext, value: T, parent?: any) {
+  write(ctx: EbinContext, value: TProcessed, parent?: any) {
     const startOffset = ctx.offset;
     const output = this.itemType.write(ctx, value, parent);
     const size = ctx.offset - startOffset;
@@ -36,10 +36,20 @@ class PadSchema<T> extends AnySchema<T> {
     return output;
   }
 
-  getSize(value: T, parent?: any) {
+  getSize(value: TProcessed, parent?: any) {
     const size = this.itemType.getSize(value, parent);
     const padding = this.blockSize - (size % this.blockSize);
     return size + padding;
+  }
+
+  _writePrepare(value: TProcessed, parent: any) {
+    this.itemType._writePrepare?.(value, parent);
+  }
+
+  _writePreprocess(value: T, parent?: any): any {
+    return this.itemType._writePreprocess
+      ? this.itemType._writePreprocess(value, parent)
+      : value;
   }
 }
 

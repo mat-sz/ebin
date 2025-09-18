@@ -96,6 +96,17 @@ export class ArraySchema<
     ctx.littleEndian = littleEndian;
   }
 
+  _writePreprocess(value: TValue[], parent?: any): any[] {
+    if (this.itemType._writePreprocess) {
+      value = [...value];
+      for (let i = 0; i < value.length; i++) {
+        value[i] = this.itemType._writePreprocess(value[i], parent);
+      }
+    }
+
+    return value;
+  }
+
   count(field: NumberLookupFieldParamType): this {
     this.lookups = {
       count: createNumberLookupField(field),
@@ -123,7 +134,7 @@ export class ArraySchema<
       (this.lookups.size?.size ?? 0) + (this.lookups.count?.size ?? 0);
   }
 
-  preWrite(value: TValue[], parent: any) {
+  _writePrepare(value: TValue[], parent: any) {
     this.lookups.size?.preWrite?.(this.getArraySize(value), parent);
     this.lookups.count?.preWrite?.(value.length, parent);
   }

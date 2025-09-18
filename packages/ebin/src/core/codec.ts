@@ -11,7 +11,7 @@ class CodecSchema<
   TDecoded,
   TEncodedSchema extends BaseSchema<any>,
   TEncoded = SchemaValue<TEncodedSchema>,
-> extends AnySchema<TDecoded> {
+> extends AnySchema<TDecoded, TEncoded> {
   isConstantSize = false;
 
   get lookups() {
@@ -26,24 +26,30 @@ class CodecSchema<
     this.isConstantSize = encodedSchema.isConstantSize;
   }
 
-  getSize(value: TDecoded, parent?: any) {
+  getSize(value: TEncoded, parent?: any) {
     if (this.isConstantSize) {
       return this.encodedSchema.getSize();
     }
 
-    return this.encodedSchema.getSize(this.options.encode(value), parent);
+    return this.encodedSchema.getSize(value, parent);
   }
 
   read(ctx: EbinContext, parent?: any) {
     return this.options.decode(this.encodedSchema.read(ctx, parent));
   }
 
-  write(ctx: EbinContext, value: TDecoded, parent?: any) {
-    return this.encodedSchema.write(ctx, this.options.encode(value), parent);
+  write(ctx: EbinContext, value: TEncoded, parent?: any) {
+    return this.encodedSchema.write(ctx, value, parent);
   }
 
-  preWrite(value: TDecoded, parent: any) {
-    this.encodedSchema.preWrite?.(this.options.encode(value), parent);
+  _writePrepare(value: TEncoded, parent: any) {
+    this.encodedSchema._writePrepare?.(value, parent);
+  }
+
+  _writePreprocess(value: TDecoded, parent?: any) {
+    return this.encodedSchema._writePreprocess
+      ? this.encodedSchema._writePreprocess(this.options.encode(value), parent)
+      : this.options.encode(value);
   }
 }
 

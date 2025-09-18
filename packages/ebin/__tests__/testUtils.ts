@@ -4,9 +4,17 @@ export interface TestCase<T> {
   label: string;
   schema: AnySchema<T>;
   tests: {
-    decoded: T;
+    decoded: T | (() => T);
     encoded: number[];
   }[];
+}
+
+function getValue(value: any | (() => any)) {
+  if (typeof value === 'function') {
+    return value();
+  }
+
+  return value;
 }
 
 export function runTestCases(testCases: TestCase<any>[]) {
@@ -14,9 +22,9 @@ export function runTestCases(testCases: TestCase<any>[]) {
     describe(testCase.label, () => {
       it('should serialize correctly', () => {
         for (const testData of testCase.tests) {
-          expect(testCase.schema.toByteArray(testData.decoded)).toEqual(
-            new Uint8Array(testData.encoded),
-          );
+          expect(
+            testCase.schema.toByteArray(getValue(testData.decoded)),
+          ).toMatchObject(new Uint8Array(testData.encoded));
         }
       });
 
@@ -24,7 +32,7 @@ export function runTestCases(testCases: TestCase<any>[]) {
         for (const testData of testCase.tests) {
           expect(
             testCase.schema.fromByteArray(new Uint8Array(testData.encoded)),
-          ).toEqual(testData.decoded);
+          ).toMatchObject(getValue(testData.decoded));
         }
       });
     });

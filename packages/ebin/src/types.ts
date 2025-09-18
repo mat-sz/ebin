@@ -10,17 +10,19 @@ export interface LookupField<T> {
   preWrite?: (value: T, parent: any) => void;
 }
 
-export interface BaseSchema<T = any> {
+export interface BaseSchema<T = any, TProcessed = T> {
   readonly TYPE: T;
   readonly isConstantSize: boolean;
   readonly lookups?: Record<string, LookupField<any> | undefined>;
   defaultValue?: T;
 
-  getSize(value?: T, parent?: any): number;
+  getSize(value?: TProcessed, parent?: any): number;
 
   read(ctx: EbinContext, parent?: any): T;
-  write(ctx: EbinContext, value: T, parent?: any): void;
-  preWrite?(value: T, parent: any): void;
+  write(ctx: EbinContext, value: TProcessed, parent?: any): void;
+
+  _writePreprocess?(value: T, parent?: any): TProcessed;
+  _writePrepare?(value: TProcessed, parent?: any): void;
 }
 
 export type TypedArray =

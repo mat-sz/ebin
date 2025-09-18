@@ -6,13 +6,13 @@ import {
 } from '../utils/lookupField.js';
 import { AnySchema } from './any.js';
 
-export abstract class BaseBytesSchema<T> extends AnySchema<T> {
+export abstract class BytesSchema<T> extends AnySchema<T, Uint8Array> {
   isConstantSize = false;
   lookups: {
     size?: LookupField<number>;
   } = {};
 
-  protected getBufferSize(value: ArrayBufferLike | TypedArray) {
+  getSize(value: Uint8Array) {
     const sizeLookup = this.lookups.size;
     if (!sizeLookup?.size) {
       return value.byteLength;
@@ -33,43 +33,34 @@ export abstract class BaseBytesSchema<T> extends AnySchema<T> {
     return this;
   }
 
-  protected readBuffer(ctx: EbinContext, parent?: any): ArrayBuffer {
+  protected readArray(ctx: EbinContext, parent?: any): Uint8Array {
     const size =
       this.lookups.size?.read(ctx, parent) ?? ctx.view.byteLength - ctx.offset;
 
     const offset = ctx.offset;
     ctx.offset += size;
-    return ctx.view.buffer.slice(offset, offset + size) as ArrayBuffer;
+    return ctx.array.slice(offset, offset + size);
   }
 
-  protected writeBuffer(ctx: EbinContext, value: ArrayBufferLike): void {
+  write(ctx: EbinContext, value: Uint8Array): void {
     this.lookups.size?.write?.(ctx, value.byteLength);
 
-    const array = new Uint8Array(ctx.view.buffer);
-    array.set(new Uint8Array(value), ctx.offset);
+    ctx.array.set(value, ctx.offset);
     ctx.offset += value.byteLength;
   }
 
-  preWrite(value: T, parent: any) {
-    this.lookups.size?.preWrite?.(this.getSize(value, parent), parent);
-  }
-}
-
-abstract class BytesSchema<
-  T extends ArrayBuffer | TypedArray,
-> extends BaseBytesSchema<T> {
-  getSize(value: T) {
-    return this.getBufferSize(value);
+  _writePrepare(value: Uint8Array, parent: any) {
+    this.lookups.size?.preWrite?.(this.getSize(value), parent);
   }
 }
 
 class ArrayBufferSchema extends BytesSchema<ArrayBuffer> {
   read(ctx: EbinContext, parent?: any): ArrayBuffer {
-    return this.readBuffer(ctx, parent);
+    return this.readArray(ctx, parent).buffer as ArrayBuffer;
   }
 
-  write(ctx: EbinContext, value: ArrayBufferLike): void {
-    this.writeBuffer(ctx, value);
+  _writePreprocess(value: ArrayBuffer) {
+    return new Uint8Array(value);
   }
 }
 

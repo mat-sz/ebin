@@ -31,13 +31,27 @@ class MatchSchema<
   }
 
   read(ctx: EbinContext, parent?: any) {
-    const matchValue = this.lookups.match.read(ctx, parent);
+    const matchValue = this.lookups.match.read(undefined as any, parent);
     return this.cases[matchValue].read(ctx, parent);
   }
 
   write(ctx: EbinContext, value: TObject, parent?: any) {
-    const matchValue = this.lookups.match.read(ctx, parent);
+    const matchValue = this.lookups.match.read(undefined as any, parent);
     this.cases[matchValue].write(ctx, value, parent);
+  }
+
+  _writePrepare?(value: TObject, parent?: any): any {
+    const matchValue = this.lookups.match.read(undefined as any, parent);
+    const schema = this.cases[matchValue];
+    return schema._writePrepare ? schema._writePrepare(value, parent) : value;
+  }
+
+  _writePreprocess?(value: TObject, parent?: any): any {
+    const matchValue = this.lookups.match.read(undefined as any, parent);
+    const schema = this.cases[matchValue];
+    return schema._writePreprocess
+      ? schema._writePreprocess(value, parent)
+      : value;
   }
 }
 

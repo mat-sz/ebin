@@ -110,15 +110,38 @@ class StructSchema<
               : ''
           }
           ${fields
-            .filter(([_, field]) => !!field.preWrite)
+            .filter(([_, field]) => !!field._writePrepare)
             .map(
-              ([key]) => `this.fields[${key}].preWrite(value[${key}], value);`,
+              ([key]) =>
+                `this.fields[${key}]._writePrepare(value[${key}], value);`,
             )
             .join('')}
           ${fields.map(([key, field]) => `this.fields[${key}].write(ctx, value[${key}]${typeof field.defaultValue !== 'undefined' ? ` ?? this.fields[${key}].defaultValue` : ''}, value);`).join('')}
           ${hasEndianness ? `ctx.littleEndian = littleEndian;` : ''}
           `,
     ).bind(this);
+
+    const preprocessFields = fields.filter(
+      ([_, field]) => !!field._writePreprocess,
+    );
+
+    if (preprocessFields.length > 0) {
+      this._writePreprocess = new Function(
+        'value',
+        `"use strict";
+        value = {...value};
+        ${preprocessFields
+          .map(
+            ([key]) =>
+              `value[${key}] = this.fields[${key}]._writePreprocess(value[${key}], value);`,
+          )
+          .join('')}
+        return value;
+        `,
+      ).bind(this);
+    } else {
+      this._writePreprocess = undefined;
+    }
   }
 
   getSize() {

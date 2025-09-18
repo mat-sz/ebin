@@ -1,15 +1,20 @@
 import { EbinContext } from '../context.js';
 import type { BaseSchema, TypedArray } from '../types.js';
 
-export abstract class AnySchema<T> implements BaseSchema<T> {
+export abstract class AnySchema<T, TProcessed = T>
+  implements BaseSchema<T, TProcessed>
+{
   readonly TYPE!: T;
   abstract get isConstantSize(): boolean;
 
   defaultValue?: T;
 
-  abstract getSize(value?: T, parent?: any): number;
+  abstract getSize(value?: TProcessed, parent?: any): number;
   abstract read(ctx: EbinContext, parent?: any): T;
-  abstract write(ctx: EbinContext, value: T, parent?: any): void;
+  abstract write(ctx: EbinContext, value: TProcessed, parent?: any): void;
+
+  _writePreprocess?(value: T, parent?: any): TProcessed;
+  _writePrepare?(value: TProcessed, parent?: any): void;
 
   protected generateFn() {}
 
@@ -19,15 +24,7 @@ export abstract class AnySchema<T> implements BaseSchema<T> {
   }
 
   fromByteArray(array: TypedArray) {
-    return this.read(
-      new EbinContext(
-        new DataView(
-          array.buffer,
-          array.byteOffset,
-          array.byteOffset + array.byteLength,
-        ),
-      ),
-    );
+    return this.read(EbinContext.fromTypedArray(array));
   }
 
   toByteArray(value: T): Uint8Array {
@@ -35,12 +32,15 @@ export abstract class AnySchema<T> implements BaseSchema<T> {
   }
 
   fromArrayBuffer(buffer: ArrayBufferLike) {
-    return this.read(new EbinContext(new DataView(buffer)));
+    return this.read(EbinContext.fromArrayBuffer(buffer));
   }
 
   toArrayBuffer(value: T) {
-    const buffer = new ArrayBuffer(this.getSize(value));
-    this.write(new EbinContext(new DataView(buffer)), value);
+    const temp: any = this._writePreprocess
+      ? this._writePreprocess(value)
+      : value;
+    const buffer = new ArrayBuffer(this.getSize(temp));
+    this.write(EbinContext.fromArrayBuffer(buffer), temp);
     return buffer;
   }
 }
