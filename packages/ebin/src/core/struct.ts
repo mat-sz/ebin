@@ -3,6 +3,7 @@ import {
   ExcludeMatchingProperties,
   SchemaValue,
 } from '../types.js';
+import { fn } from '../utils/codegen.js';
 import { SchemaWithEndianness } from './any.js';
 
 type StructFields = Record<string, BaseSchema<any>>;
@@ -71,74 +72,75 @@ class StructSchema<
       ([key, field]) => [JSON.stringify(key), field] as const,
     );
 
-    this.read = new Function(
-      'ctx',
-      `"use strict";
-      ${
-        hasEndianness
-          ? `
-          const littleEndian = ctx.littleEndian;
-          ctx.littleEndian = ${this._littleEndian};
-          `
-          : ''
-      }
-      ${
-        hasParentDependencies
-          ? `
-          const obj = {};
-          ${fields.map(([key]) => `obj[${key}] = this.fields[${key}].read(ctx, obj);`).join('')}
-          `
-          : `
-          const obj = { ${fields.map(([key]) => `${key}: this.fields[${key}].read(ctx)`).join(',')} };
-          `
-      }
-      ${hasEndianness ? `ctx.littleEndian = littleEndian;` : ''}
-      return obj;
-      `,
-    ).bind(this);
+    const readBuilder = fn('ctx');
+    if (hasEndianness) {
+      readBuilder.line(`var littleEndian = ctx.littleEndian;`);
+      readBuilder.line(`ctx.littleEndian = ${this._littleEndian};`);
+    }
 
-    this.write = new Function(
-      'ctx',
-      'value',
-      `"use strict";
-          ${
-            hasEndianness
-              ? `
-              const littleEndian = ctx.littleEndian;
-              ctx.littleEndian = ${this._littleEndian};
-              `
-              : ''
-          }
-          ${fields
-            .filter(([_, field]) => !!field._writePrepare)
-            .map(
-              ([key]) =>
-                `this.fields[${key}]._writePrepare(value[${key}], value);`,
-            )
-            .join('')}
-          ${fields.map(([key, field]) => `this.fields[${key}].write(ctx, value[${key}]${typeof field.defaultValue !== 'undefined' ? ` ?? this.fields[${key}].defaultValue` : ''}, value);`).join('')}
-          ${hasEndianness ? `ctx.littleEndian = littleEndian;` : ''}
-          `,
-    ).bind(this);
+    if (hasParentDependencies) {
+      readBuilder.line(`var obj = {};`);
+      for (const [key] of fields) {
+        readBuilder.line(`obj[${key}] = this.fields[${key}].read(ctx, obj);`);
+      }
+    } else {
+      readBuilder.line(`var obj = {`);
+      for (const [key] of fields) {
+        readBuilder.line(`${key}: this.fields[${key}].read(ctx),`);
+      }
+      readBuilder.line(`};`);
+    }
+
+    if (hasEndianness) {
+      readBuilder.line(`ctx.littleEndian = littleEndian;`);
+    }
+
+    readBuilder.line(`return obj;`);
+
+    this.read = readBuilder.generate(this);
+
+    const writeBuilder = fn('ctx', 'value');
+    if (hasEndianness) {
+      writeBuilder.line(`var littleEndian = ctx.littleEndian;`);
+      writeBuilder.line(`ctx.littleEndian = ${this._littleEndian};`);
+    }
+
+    for (const [key, field] of fields) {
+      if (!field._writePrepare) {
+        continue;
+      }
+
+      writeBuilder.line(
+        `this.fields[${key}]._writePrepare(value[${key}], value);`,
+      );
+    }
+
+    for (const [key, field] of fields) {
+      writeBuilder.line(
+        `this.fields[${key}].write(ctx, value[${key}]${typeof field.defaultValue !== 'undefined' ? ` ?? this.fields[${key}].defaultValue` : ''}, value);`,
+      );
+    }
+
+    if (hasEndianness) {
+      writeBuilder.line(`ctx.littleEndian = littleEndian;`);
+    }
+
+    this.write = writeBuilder.generate(this);
 
     const preprocessFields = fields.filter(
       ([_, field]) => !!field._writePreprocess,
     );
 
     if (preprocessFields.length > 0) {
-      this._writePreprocess = new Function(
-        'value',
-        `"use strict";
-        value = {...value};
-        ${preprocessFields
-          .map(
-            ([key]) =>
-              `value[${key}] = this.fields[${key}]._writePreprocess(value[${key}], value);`,
-          )
-          .join('')}
-        return value;
-        `,
-      ).bind(this);
+      const writePreprocessBuilder = fn('value');
+      writePreprocessBuilder.line(`value = {...value};`);
+      for (const [key] of preprocessFields) {
+        writePreprocessBuilder.line(
+          `value[${key}] = this.fields[${key}]._writePreprocess(value[${key}], value);`,
+        );
+      }
+      writePreprocessBuilder.line(`return value;`);
+      this._writePreprocess = writePreprocessBuilder.generate(this);
     } else {
       this._writePreprocess = undefined;
     }

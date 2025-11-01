@@ -9,6 +9,7 @@
     "esModuleInterop": true,
     "downlevelIteration": true,
     "strict": true,
+    "alwaysStrict": true,
     "types": ["vitest/globals"]
   },
   "include": ["src"],

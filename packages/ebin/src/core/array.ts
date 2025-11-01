@@ -26,6 +26,16 @@ export class ArraySchema<
 
   constructor(public itemType: TItemSchema) {
     super();
+
+    if (itemType._writePreprocess) {
+      this._writePreprocess = (value: TValue[], parent?: any) => {
+        value = [...value];
+        for (let i = 0; i < value.length; i++) {
+          value[i] = this.itemType._writePreprocess!(value[i], parent);
+        }
+        return value;
+      };
+    }
   }
 
   private getArraySize(value: TValue[]) {
@@ -94,17 +104,6 @@ export class ArraySchema<
     }
 
     ctx.littleEndian = littleEndian;
-  }
-
-  _writePreprocess(value: TValue[], parent?: any): any[] {
-    if (this.itemType._writePreprocess) {
-      value = [...value];
-      for (let i = 0; i < value.length; i++) {
-        value[i] = this.itemType._writePreprocess(value[i], parent);
-      }
-    }
-
-    return value;
   }
 
   count(field: NumberLookupFieldParamType): this {

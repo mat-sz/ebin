@@ -9,6 +9,12 @@ export class EbinContext {
     this.array = new Uint8Array(view.buffer);
   }
 
+  forward(size: number) {
+    const offset = this.offset;
+    this.offset += size;
+    return offset;
+  }
+
   static fromArrayBuffer(buffer: ArrayBufferLike) {
     return new EbinContext(new DataView(buffer));
   }
