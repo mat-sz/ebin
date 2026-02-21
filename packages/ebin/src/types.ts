@@ -44,3 +44,9 @@ export type ExcludeMatchingProperties<T, V> = Pick<
   T,
   { [K in keyof T]-?: T[K] extends V ? never : K }[keyof T]
 >;
+
+export interface TextEncoding {
+  getSize(input: string): number;
+  decode(input: Uint8Array): string;
+  encode(input: string, output: Uint8Array): void;
+}
