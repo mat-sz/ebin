@@ -37,9 +37,7 @@ export abstract class BytesSchema<T> extends AnySchema<T, Uint8Array> {
     const size =
       this.lookups.size?.read(ctx, parent) ?? ctx.view.byteLength - ctx.offset;
 
-    const offset = ctx.offset;
-    ctx.offset += size;
-    return ctx.array.slice(offset, offset + size);
+    return ctx.bytes(size);
   }
 
   write(ctx: EbinContext, value: Uint8Array): void {

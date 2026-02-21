@@ -1,4 +1,4 @@
-import { TypedArray } from './types.js';
+import type { TypedArray } from './types.js';
 
 export class EbinContext {
   littleEndian = false;
@@ -7,6 +7,16 @@ export class EbinContext {
 
   constructor(public view: DataView) {
     this.array = new Uint8Array(view.buffer);
+  }
+
+  slice(offset: number, size: number) {
+    return new Uint8Array(this.view.buffer, offset, size);
+  }
+
+  bytes(size: number) {
+    const offset = this.offset;
+    this.offset += size;
+    return this.slice(offset, size);
   }
 
   forward(size: number) {
