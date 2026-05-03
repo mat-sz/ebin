@@ -1,9 +1,6 @@
-import { EbinContext } from '../context.js';
-import { BaseSchema, LookupField, SchemaValue } from '../types.js';
-import {
-  createNumberLookupField,
-  NumberLookupFieldParamType,
-} from '../utils/lookupField.js';
+import type { EbinContext } from '../context.js';
+import type { BaseSchema, LookupField, SchemaValue } from '../types.js';
+import { createNumberLookupField, type NumberLookupFieldParamType } from '../utils/lookupField.js';
 import { SchemaWithEndianness } from './any.js';
 
 export class ArraySchema<
@@ -18,10 +15,7 @@ export class ArraySchema<
   private _prefixSize: number = 0;
 
   get isConstantSize() {
-    return !!(
-      this.lookups.size?.isConstant ||
-      (this.lookups.count?.isConstant && this.itemType.isConstantSize)
-    );
+    return !!(this.lookups.size?.isConstant || (this.lookups.count?.isConstant && this.itemType.isConstantSize));
   }
 
   constructor(public itemType: TItemSchema) {
@@ -43,10 +37,7 @@ export class ArraySchema<
       return value.length * this.itemType.getSize(value[0]);
     }
 
-    return value.reduce(
-      (byteLength, item) => byteLength + this.itemType.getSize(item),
-      0,
-    );
+    return value.reduce((byteLength, item) => byteLength + this.itemType.getSize(item), 0);
   }
 
   getSize(value: TValue[]) {
@@ -64,9 +55,7 @@ export class ArraySchema<
 
       return items;
     } else {
-      const size =
-        this.lookups.size?.read(ctx, parent) ??
-        ctx.view.byteLength - ctx.offset;
+      const size = this.lookups.size?.read(ctx, parent) ?? ctx.view.byteLength - ctx.offset;
 
       const offset = ctx.offset;
       const items: TValue[] = [];
@@ -129,8 +118,7 @@ export class ArraySchema<
   }
 
   private updatePrefixSize() {
-    this._prefixSize =
-      (this.lookups.size?.size ?? 0) + (this.lookups.count?.size ?? 0);
+    this._prefixSize = (this.lookups.size?.size ?? 0) + (this.lookups.count?.size ?? 0);
   }
 
   _writePrepare(value: TValue[], parent: any) {
@@ -139,8 +127,6 @@ export class ArraySchema<
   }
 }
 
-export function array<TItemSchema extends BaseSchema<any>>(
-  itemType: TItemSchema,
-): ArraySchema<TItemSchema> {
+export function array<TItemSchema extends BaseSchema<any>>(itemType: TItemSchema): ArraySchema<TItemSchema> {
   return new ArraySchema(itemType);
 }

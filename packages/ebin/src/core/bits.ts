@@ -100,7 +100,7 @@ class BitsSchema<
       }
     }
 
-    return out + ' };';
+    return `${out} };`;
   }
 
   private generateBitsWrite(vars: number[]) {
@@ -157,8 +157,6 @@ class BitsSchema<
   write() {}
 }
 
-export function bits<TFields extends BitsFields>(
-  fields: TFields,
-): BitsSchema<TFields> {
+export function bits<TFields extends BitsFields>(fields: TFields): BitsSchema<TFields> {
   return new BitsSchema(fields);
 }

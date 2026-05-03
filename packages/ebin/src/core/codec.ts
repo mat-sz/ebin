@@ -1,5 +1,5 @@
-import { EbinContext } from '../context.js';
-import { BaseSchema, SchemaValue } from '../types.js';
+import type { EbinContext } from '../context.js';
+import type { BaseSchema, SchemaValue } from '../types.js';
 import { AnySchema } from './any.js';
 
 interface CodecSchemaOptions<TDecoded, TEncoded> {
@@ -53,11 +53,7 @@ class CodecSchema<
   }
 }
 
-export function codec<
-  TDecoded,
-  TEncodedSchema extends BaseSchema<any>,
-  TEncoded = SchemaValue<TEncodedSchema>,
->(
+export function codec<TDecoded, TEncodedSchema extends BaseSchema<any>, TEncoded = SchemaValue<TEncodedSchema>>(
   inputSchema: TEncodedSchema,
   options: CodecSchemaOptions<TDecoded, TEncoded>,
 ) {

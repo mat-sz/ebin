@@ -1,12 +1,12 @@
 import * as e from '../../src/index.js';
-import { runTestCases, TestCase } from '../testUtils.js';
+import { runTestCases, type TestCase } from '../testUtils.js';
 
 const TEST_CASES: TestCase<any>[] = [
   {
     label: 'timestamp',
     schema: e.codec(e.uint32(), {
-      decode: int => new Date(int * 1000),
-      encode: date => date.getTime() / 1000,
+      decode: (int) => new Date(int * 1000),
+      encode: (date) => date.getTime() / 1000,
     }),
     tests: [
       {
@@ -18,8 +18,8 @@ const TEST_CASES: TestCase<any>[] = [
   {
     label: 'json',
     schema: e.codec(e.string().size(e.uint16()), {
-      decode: str => JSON.parse(str),
-      encode: json => JSON.stringify(json),
+      decode: (str) => JSON.parse(str),
+      encode: (json) => JSON.stringify(json),
     }),
     tests: [
       {

@@ -71,8 +71,7 @@ export function decode(input: Uint8Array): string {
       const byte2 = input[offset++] & 0x3f;
       const byte3 = input[offset++] & 0x3f;
       const byte4 = input[offset++] & 0x3f;
-      let unit =
-        ((byte1 & 0x07) << 0x12) | (byte2 << 0x0c) | (byte3 << 0x06) | byte4;
+      let unit = ((byte1 & 0x07) << 0x12) | (byte2 << 0x0c) | (byte3 << 0x06) | byte4;
       if (unit > 0xffff) {
         unit -= 0x10000;
         out.push(((unit >>> 10) & 0x3ff) | 0xd800);

@@ -1,4 +1,4 @@
-import { EbinContext } from '../context.js';
+import type { EbinContext } from '../context.js';
 import { ConstantSizeSchema } from './any.js';
 
 class SkipSchema extends ConstantSizeSchema<never> {

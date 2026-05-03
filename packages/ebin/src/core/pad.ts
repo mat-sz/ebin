@@ -1,5 +1,5 @@
-import { EbinContext } from '../context.js';
-import { BaseSchema } from '../types.js';
+import type { EbinContext } from '../context.js';
+import type { BaseSchema } from '../types.js';
 import { AnySchema } from './any.js';
 
 class PadSchema<T, TProcessed = T> extends AnySchema<T, TProcessed> {
@@ -47,15 +47,10 @@ class PadSchema<T, TProcessed = T> extends AnySchema<T, TProcessed> {
   }
 
   _writePreprocess(value: T, parent?: any): any {
-    return this.itemType._writePreprocess
-      ? this.itemType._writePreprocess(value, parent)
-      : value;
+    return this.itemType._writePreprocess ? this.itemType._writePreprocess(value, parent) : value;
   }
 }
 
-export function pad<T>(
-  itemType: BaseSchema<T>,
-  blockSize: number,
-): PadSchema<T> {
+export function pad<T>(itemType: BaseSchema<T>, blockSize: number): PadSchema<T> {
   return new PadSchema(itemType, blockSize);
 }

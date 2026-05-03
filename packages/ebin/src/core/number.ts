@@ -1,4 +1,4 @@
-import { EbinContext } from '../context.js';
+import type { EbinContext } from '../context.js';
 import { fn } from '../utils/codegen.js';
 import { fromFloat16, IS_FP16_SUPPORTED, toFloat16 } from '../utils/float16.js';
 import { ConstantSizeSchema, SchemaWithEndianness } from './any.js';
@@ -19,32 +19,23 @@ class NumberSchema<T extends bigint | number> extends SchemaWithEndianness<T> {
 
     if (this.viewSuffix === 'Float16' && !IS_FP16_SUPPORTED) {
       this.read = ((ctx: EbinContext) => {
-        return fromFloat16(
-          ctx.view.getUint16(
-            ctx.forward(2),
-            this._littleEndian ?? ctx.littleEndian,
-          ),
-        );
+        return fromFloat16(ctx.view.getUint16(ctx.forward(2), this._littleEndian ?? ctx.littleEndian));
       }) as any;
       this.write = ((ctx: EbinContext, value: number) => {
-        ctx.view.setUint16(
-          ctx.forward(2),
-          toFloat16(value),
-          this._littleEndian ?? ctx.littleEndian,
-        );
+        ctx.view.setUint16(ctx.forward(2), toFloat16(value), this._littleEndian ?? ctx.littleEndian);
       }) as any;
       return;
     }
 
     this.read = fn('ctx')
       .line(
-        `return ctx.view.get${this.viewSuffix}(ctx.forward(${this.size}), ${hasEndianness ? JSON.stringify(this._littleEndian) : `ctx.littleEndian`});`,
+        `return ctx.view.get${this.viewSuffix}(ctx.forward(${this.size}), ${hasEndianness ? JSON.stringify(this._littleEndian) : 'ctx.littleEndian'});`,
       )
       .generate(this);
 
     this.write = fn('ctx', 'value')
       .line(
-        `ctx.view.set${this.viewSuffix}(ctx.forward(${this.size}), value, ${hasEndianness ? JSON.stringify(this._littleEndian) : `ctx.littleEndian`});`,
+        `ctx.view.set${this.viewSuffix}(ctx.forward(${this.size}), value, ${hasEndianness ? JSON.stringify(this._littleEndian) : 'ctx.littleEndian'});`,
       )
       .generate(this);
   }

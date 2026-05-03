@@ -1,11 +1,10 @@
-import { bench } from 'vitest';
-
-import * as e from 'ebin';
-import { bp } from 'binparse';
-// @ts-ignore
+// @ts-expect-error
 import { Parser } from 'binary-parser';
 import { Parser as Encoder } from 'binary-parser-encoder';
+import { bp } from 'binparse';
 import Destruct from 'destruct-js';
+import * as e from 'ebin';
+import { bench } from 'vitest';
 
 // ebin
 const EbinPoints = e
@@ -53,7 +52,7 @@ destructSpec
   .field('len', Destruct.UInt32)
   .loop(
     'points',
-    r => r.len,
+    (r) => r.len,
     new Destruct.Spec({ mode: Destruct.Mode.LE })
       .field('x', Destruct.Bits4)
       .field('y', Destruct.Bits2)

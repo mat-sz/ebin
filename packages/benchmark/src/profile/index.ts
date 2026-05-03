@@ -1,13 +1,11 @@
-import { Session } from 'node:inspector/promises';
 import fs from 'node:fs';
+import { Session } from 'node:inspector/promises';
 
 const session = new Session();
 session.connect();
 
 const path = process.argv[process.argv.length - 1];
-const { run, config = { repeat: 1_000_000 } } = await import(
-  process.argv[process.argv.length - 1]
-);
+const { run, config = { repeat: 1_000_000 } } = await import(process.argv[process.argv.length - 1]);
 
 async function main() {
   await session.post('Profiler.enable');
@@ -18,10 +16,7 @@ async function main() {
 
   const { profile } = await session.post('Profiler.stop');
 
-  fs.writeFileSync(
-    `./profiles/${path.replaceAll('/', '_').replace('._', '')}.cpuprofile`,
-    JSON.stringify(profile),
-  );
+  fs.writeFileSync(`./profiles/${path.replaceAll('/', '_').replace('._', '')}.cpuprofile`, JSON.stringify(profile));
 }
 
 main();

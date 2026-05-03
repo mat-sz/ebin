@@ -1,9 +1,6 @@
-import { EbinContext } from '../context.js';
-import { LookupField, TypedArray } from '../types.js';
-import {
-  createNumberLookupField,
-  NumberLookupFieldParamType,
-} from '../utils/lookupField.js';
+import type { EbinContext } from '../context.js';
+import type { LookupField } from '../types.js';
+import { createNumberLookupField, type NumberLookupFieldParamType } from '../utils/lookupField.js';
 import { AnySchema } from './any.js';
 
 export abstract class BytesSchema<T> extends AnySchema<T, Uint8Array> {
@@ -34,8 +31,7 @@ export abstract class BytesSchema<T> extends AnySchema<T, Uint8Array> {
   }
 
   protected readArray(ctx: EbinContext, parent?: any): Uint8Array {
-    const size =
-      this.lookups.size?.read(ctx, parent) ?? ctx.view.byteLength - ctx.offset;
+    const size = this.lookups.size?.read(ctx, parent) ?? ctx.view.byteLength - ctx.offset;
 
     return ctx.bytes(size);
   }

@@ -1,5 +1,5 @@
-import { EbinContext } from '../context.js';
-import { BaseSchema, LookupField } from '../types.js';
+import type { EbinContext } from '../context.js';
+import type { BaseSchema, LookupField } from '../types.js';
 
 export class LookupFieldParent<T> implements LookupField<T> {
   readonly dependsOnParent = true;
@@ -49,9 +49,7 @@ export class LookupFieldPrefix<T> implements LookupField<T> {
 
 export type NumberLookupFieldParamType = string | number | BaseSchema<number>;
 
-export function createNumberLookupField(
-  field: NumberLookupFieldParamType,
-): LookupField<number> {
+export function createNumberLookupField(field: NumberLookupFieldParamType): LookupField<number> {
   switch (typeof field) {
     case 'string':
       return new LookupFieldParent(field);

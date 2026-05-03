@@ -1,5 +1,5 @@
 import * as e from '../../src/index.js';
-import { runTestCases, TestCase } from '../testUtils.js';
+import { runTestCases, type TestCase } from '../testUtils.js';
 
 const TEST_CASES: TestCase<any>[] = [
   {

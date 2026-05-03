@@ -8,26 +8,13 @@
     "build": "yarn workspace ebin run build",
     "test": "yarn workspace ebin run test",
     "bench": "yarn build && yarn workspace ebin-benchmark run bench",
-    "profile": "yarn build && yarn workspace ebin-benchmark run profile"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "**/src/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
-      "prettier --write"
-    ],
-    "**/__tests__/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
-      "prettier --write"
-    ]
+    "profile": "yarn build && yarn workspace ebin-benchmark run profile",
+    "lint": "npx @biomejs/biome check --write --no-errors-on-unmatched --files-ignore-unknown=true --colors=off --max-diagnostics=50 ."
   },
   "packageManager": "yarn@4.9.2",
   "devDependencies": {
-    "husky": "^9.1.7",
-    "lint-staged": "^16.1.5",
-    "prettier": "^3.6.2",
+    "@biomejs/biome": "^2.4.14",
+    "lefthook": "^2.1.6",
     "vitest": "^3.2.4"
   }
 }

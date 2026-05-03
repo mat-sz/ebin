@@ -1,12 +1,11 @@
-import { bench } from 'vitest';
-
-import * as e from 'ebin';
-import { bp } from 'binparse';
-// @ts-ignore
+// @ts-expect-error
 import { Parser } from 'binary-parser';
 import { Parser as Encoder } from 'binary-parser-encoder';
+import { bp } from 'binparse';
 import Destruct from 'destruct-js';
+import * as e from 'ebin';
 import Struct from 'structron';
+import { bench } from 'vitest';
 
 // ebin
 const EbinStrings = e
@@ -43,30 +42,20 @@ destructSpec
   .field('len', Destruct.UInt32)
   .loop(
     'strings',
-    r => r.len,
-    new Destruct.Spec({ mode: Destruct.Mode.LE }).field(
-      'string',
-      Destruct.Text,
-      { size: 4 },
-    ),
+    (r) => r.len,
+    new Destruct.Spec({ mode: Destruct.Mode.LE }).field('string', Destruct.Text, { size: 4 }),
   );
 
 // structron
 const StructronStrings = new Struct()
   .addMember(Struct.TYPES.UINT_LE, 'len')
-  .addArray(
-    new Struct().addMember(Struct.TYPES.STRING(4, 'utf-8'), 'string'),
-    'strings',
-    0,
-    'len',
-  );
+  .addArray(new Struct().addMember(Struct.TYPES.STRING(4, 'utf-8'), 'string'), 'strings', 0, 'len');
 
 // Prepare input
 
 function randomString(length = 4) {
   let result = '';
-  const characters =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   const charactersLength = characters.length;
   for (let i = 0; i < length; i++) {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));
@@ -94,7 +83,7 @@ for (let i = 0; i < n; i++) {
   obj.strings.push(randomString());
 }
 
-const bpeObj = { strings: obj.strings.map(str => ({ string: str })) };
+const bpeObj = { strings: obj.strings.map((str) => ({ string: str })) };
 
 describe('parse', () => {
   bench('ebin', () => {

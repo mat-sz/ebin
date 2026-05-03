@@ -40,10 +40,7 @@ export type TypedArray =
 
 export type SchemaValue<T extends BaseSchema<any>> = T['TYPE'];
 
-export type ExcludeMatchingProperties<T, V> = Pick<
-  T,
-  { [K in keyof T]-?: T[K] extends V ? never : K }[keyof T]
->;
+export type ExcludeMatchingProperties<T, V> = Pick<T, { [K in keyof T]-?: T[K] extends V ? never : K }[keyof T]>;
 
 export interface TextEncoding {
   getSize(input: string): number;

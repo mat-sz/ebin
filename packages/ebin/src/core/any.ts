@@ -1,9 +1,7 @@
 import { EbinContext } from '../context.js';
 import type { BaseSchema, TypedArray } from '../types.js';
 
-export abstract class AnySchema<T, TProcessed = T>
-  implements BaseSchema<T, TProcessed>
-{
+export abstract class AnySchema<T, TProcessed = T> implements BaseSchema<T, TProcessed> {
   readonly TYPE!: T;
   abstract get isConstantSize(): boolean;
 
@@ -36,9 +34,7 @@ export abstract class AnySchema<T, TProcessed = T>
   }
 
   toArrayBuffer(value: T) {
-    const temp: any = this._writePreprocess
-      ? this._writePreprocess(value)
-      : value;
+    const temp: any = this._writePreprocess ? this._writePreprocess(value) : value;
     const buffer = new ArrayBuffer(this.getSize(temp));
     this.write(EbinContext.fromArrayBuffer(buffer), temp);
     return buffer;

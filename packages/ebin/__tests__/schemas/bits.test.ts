@@ -1,5 +1,5 @@
 import * as e from '../../src/index.js';
-import { runTestCases, TestCase } from '../testUtils.js';
+import { runTestCases, type TestCase } from '../testUtils.js';
 
 const TEST_CASES: TestCase<any>[] = [
   {
@@ -59,10 +59,7 @@ const TEST_CASES: TestCase<any>[] = [
           b: 0x0,
           c: 0x3fffffff,
         },
-        encoded: [
-          0xff, 0xff, 0xff, 0xfc, 0x00, 0x00, 0x00, 0x00, 0x3f, 0xff, 0xff,
-          0xff,
-        ],
+        encoded: [0xff, 0xff, 0xff, 0xfc, 0x00, 0x00, 0x00, 0x00, 0x3f, 0xff, 0xff, 0xff],
       },
     ],
   },

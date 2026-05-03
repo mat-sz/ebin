@@ -30,12 +30,6 @@ export class EbinContext {
   }
 
   static fromTypedArray(array: TypedArray) {
-    return new EbinContext(
-      new DataView(
-        array.buffer,
-        array.byteOffset,
-        array.byteOffset + array.byteLength,
-      ),
-    );
+    return new EbinContext(new DataView(array.buffer, array.byteOffset, array.byteOffset + array.byteLength));
   }
 }

@@ -1,4 +1,4 @@
-import { AnySchema } from '../src/core/any.js';
+import type { AnySchema } from '../src/core/any.js';
 
 export interface TestCase<T> {
   label: string;
@@ -22,17 +22,17 @@ export function runTestCases(testCases: TestCase<any>[]) {
     describe(testCase.label, () => {
       it('should serialize correctly', () => {
         for (const testData of testCase.tests) {
-          expect(
-            testCase.schema.toByteArray(getValue(testData.decoded)),
-          ).toMatchObject(new Uint8Array(testData.encoded));
+          expect(testCase.schema.toByteArray(getValue(testData.decoded))).toMatchObject(
+            new Uint8Array(testData.encoded),
+          );
         }
       });
 
       it('should parse correctly', () => {
         for (const testData of testCase.tests) {
-          expect(
-            testCase.schema.fromByteArray(new Uint8Array(testData.encoded)),
-          ).toMatchObject(getValue(testData.decoded));
+          expect(testCase.schema.fromByteArray(new Uint8Array(testData.encoded))).toMatchObject(
+            getValue(testData.decoded),
+          );
         }
       });
     });

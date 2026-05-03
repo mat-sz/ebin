@@ -1,11 +1,10 @@
-import { EbinContext } from '../context.js';
-import { BaseSchema, SchemaValue } from '../types.js';
+import type { EbinContext } from '../context.js';
+import type { BaseSchema, SchemaValue } from '../types.js';
 import { LookupFieldParent } from '../utils/lookupField.js';
 import { AnySchema } from './any.js';
 
 type MatchCases<TSchema extends BaseSchema<any>> = Record<string, TSchema>;
-type MatchObject<T extends MatchCases<any>> =
-  T extends MatchCases<infer U> ? U : never;
+type MatchObject<T extends MatchCases<any>> = T extends MatchCases<infer U> ? U : never;
 
 class MatchSchema<
   TCases extends MatchCases<any>,
@@ -49,15 +48,10 @@ class MatchSchema<
   _writePreprocess?(value: TObject, parent?: any): any {
     const matchValue = this.lookups.match.read(undefined as any, parent);
     const schema = this.cases[matchValue];
-    return schema._writePreprocess
-      ? schema._writePreprocess(value, parent)
-      : value;
+    return schema._writePreprocess ? schema._writePreprocess(value, parent) : value;
   }
 }
 
-export function match<TCases extends MatchCases<any>>(
-  field: string,
-  cases: TCases,
-): MatchSchema<TCases> {
+export function match<TCases extends MatchCases<any>>(field: string, cases: TCases): MatchSchema<TCases> {
   return new MatchSchema(field, cases);
 }

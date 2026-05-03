@@ -1,5 +1,5 @@
 import * as e from '../../src/index.js';
-import { runTestCases, TestCase } from '../testUtils.js';
+import { runTestCases, type TestCase } from '../testUtils.js';
 
 const TEST_CASES: TestCase<any>[] = [
   {
@@ -9,9 +9,7 @@ const TEST_CASES: TestCase<any>[] = [
       test2: e.skip(4),
       test3: e.uint16(),
     }),
-    tests: [
-      { decoded: { test1: 1, test3: 1 }, encoded: [0, 1, 0, 0, 0, 0, 0, 1] },
-    ],
+    tests: [{ decoded: { test1: 1, test3: 1 }, encoded: [0, 1, 0, 0, 0, 0, 0, 1] }],
   },
 ];
 

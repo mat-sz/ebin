@@ -1,12 +1,11 @@
-import { bench } from 'vitest';
-
-import * as e from 'ebin';
-import { bp } from 'binparse';
-// @ts-ignore
+// @ts-expect-error
 import { Parser } from 'binary-parser';
 import { Parser as Encoder } from 'binary-parser-encoder';
+import { bp } from 'binparse';
 import Destruct from 'destruct-js';
+import * as e from 'ebin';
 import Struct from 'structron';
+import { bench } from 'vitest';
 
 // ebin
 const EbinPoint = e.struct({
@@ -52,20 +51,20 @@ const point = { x: 0xff, y: 0xcc, z: 0xdd };
 
 describe('parse', () => {
   bench('hand-written - Buffer', () => {
-    const point = {
+    return {
       x: buf.readUInt8(0),
       y: buf.readUInt8(1),
       z: buf.readUInt8(2),
-    };
+    } as any;
   });
 
   bench('hand-written - DataView', () => {
     const dataView = new DataView(arrayBuffer);
-    const point = {
+    return {
       x: dataView.getUint8(0),
       y: dataView.getUint8(1),
       z: dataView.getUint8(2),
-    };
+    } as any;
   });
 
   bench('ebin', () => {

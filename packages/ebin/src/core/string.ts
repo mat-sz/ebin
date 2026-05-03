@@ -1,9 +1,6 @@
 import type { EbinContext } from '../context.js';
 import type { LookupField } from '../types.js';
-import {
-  createNumberLookupField,
-  type NumberLookupFieldParamType,
-} from '../utils/lookupField.js';
+import { createNumberLookupField, type NumberLookupFieldParamType } from '../utils/lookupField.js';
 import { textEncodings } from '../utils/textEncoding/index.js';
 import { AnySchema } from './any.js';
 
@@ -38,8 +35,7 @@ class StringSchema extends AnySchema<string> {
   }
 
   read(ctx: EbinContext, parent?: any) {
-    const size =
-      this.lookups.size?.read(ctx, parent) ?? ctx.view.byteLength - ctx.offset;
+    const size = this.lookups.size?.read(ctx, parent) ?? ctx.view.byteLength - ctx.offset;
 
     const buffer = ctx.bytes(size);
     return this._encoding.decode(buffer);
