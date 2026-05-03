@@ -1,5 +1,5 @@
 import type { EbinContext } from '../context.js';
-import type { LookupField } from '../types.js';
+import type { ISchemaCompileOptions, LookupField } from '../types.js';
 import { createNumberLookupField, type NumberLookupFieldParamType } from '../utils/lookupField.js';
 import { AnySchema } from './any.js';
 
@@ -9,6 +9,12 @@ export abstract class BytesSchema<T> extends AnySchema<T, Uint8Array> {
     size?: LookupField<number>;
   } = {};
 
+  compile(options?: ISchemaCompileOptions) {
+    this.lookups.size?.compile?.(options);
+
+    super.compile();
+  }
+
   getSize(value: Uint8Array) {
     const sizeLookup = this.lookups.size;
     if (!sizeLookup?.size) {
@@ -16,7 +22,6 @@ export abstract class BytesSchema<T> extends AnySchema<T, Uint8Array> {
     }
 
     if (sizeLookup.isConstant) {
-      // TODO: Fix.
       return sizeLookup.read(undefined as any);
     }
 
@@ -49,6 +54,12 @@ export abstract class BytesSchema<T> extends AnySchema<T, Uint8Array> {
 }
 
 class ArrayBufferSchema extends BytesSchema<ArrayBuffer> {
+  clone() {
+    const clone = new ArrayBufferSchema();
+    clone.lookups = this.cloneLookups();
+    return clone as this;
+  }
+
   read(ctx: EbinContext, parent?: any): ArrayBuffer {
     return this.readArray(ctx, parent).buffer as ArrayBuffer;
   }

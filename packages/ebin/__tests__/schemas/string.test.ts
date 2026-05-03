@@ -20,6 +20,25 @@ const TEST_CASES: TestCase<any>[] = [
     schema: e.string().size(e.uint16()),
     tests: [{ decoded: 'TEST', encoded: [0x00, 0x04, 0x54, 0x45, 0x53, 0x54] }],
   },
+  {
+    label: 'size-prefixed (little-endian parent)',
+    schema: e
+      .struct({
+        data: e.string().size(e.uint16()),
+      })
+      .littleEndian(),
+    tests: [
+      {
+        decoded: { data: 'TEST' },
+        encoded: [0x04, 0x00, 0x54, 0x45, 0x53, 0x54],
+      },
+    ],
+  },
+  {
+    label: 'constant size',
+    schema: e.string().size(4),
+    tests: [{ decoded: 'TEST', encoded: [0x54, 0x45, 0x53, 0x54] }],
+  },
 ];
 
 describe('string', () => runTestCases(TEST_CASES));

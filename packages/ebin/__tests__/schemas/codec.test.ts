@@ -28,6 +28,23 @@ const TEST_CASES: TestCase<any>[] = [
       },
     ],
   },
+  {
+    label: 'passes little-endian down',
+    schema: e
+      .struct({
+        data: e.codec(e.string().size(e.uint16()), {
+          decode: (str) => JSON.parse(str),
+          encode: (json) => JSON.stringify(json),
+        }),
+      })
+      .littleEndian(),
+    tests: [
+      {
+        decoded: { data: {} },
+        encoded: [0x02, 0x00, 0x7b, 0x7d],
+      },
+    ],
+  },
 ];
 
 describe('codec', () => runTestCases(TEST_CASES));

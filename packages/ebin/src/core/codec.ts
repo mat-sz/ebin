@@ -1,5 +1,5 @@
 import type { EbinContext } from '../context.js';
-import type { BaseSchema, SchemaValue } from '../types.js';
+import type { BaseSchema, ISchemaCompileOptions, SchemaValue } from '../types.js';
 import { AnySchema } from './any.js';
 
 interface CodecSchemaOptions<TDecoded, TEncoded> {
@@ -13,17 +13,31 @@ class CodecSchema<
   TEncoded = SchemaValue<TEncodedSchema>,
 > extends AnySchema<TDecoded, TEncoded> {
   isConstantSize = false;
+  private encodedSchema: TEncodedSchema;
 
   get lookups() {
     return this.encodedSchema.lookups;
   }
 
   constructor(
-    private encodedSchema: TEncodedSchema,
+    encodedSchema: TEncodedSchema,
     private options: CodecSchemaOptions<TDecoded, TEncoded>,
   ) {
     super();
-    this.isConstantSize = encodedSchema.isConstantSize;
+
+    this.encodedSchema = encodedSchema.clone();
+    this.isConstantSize = this.encodedSchema.isConstantSize;
+  }
+
+  compile(options?: ISchemaCompileOptions) {
+    this.encodedSchema.compile(options);
+
+    super.compile();
+  }
+
+  clone() {
+    const clone = new CodecSchema(this.encodedSchema, this.options);
+    return clone as this;
   }
 
   getSize(value: TEncoded, parent?: any) {

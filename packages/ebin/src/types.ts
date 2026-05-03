@@ -1,13 +1,20 @@
 import type { EbinContext } from './context.js';
 
+export interface ISchemaCompileOptions {
+  littleEndian?: boolean;
+}
+
 export interface LookupField<T> {
   readonly size: number;
   readonly isConstant: boolean;
   readonly parentField?: string;
 
+  clone(): this;
+  compile?(options?: ISchemaCompileOptions | undefined): void;
+
   read(ctx: EbinContext, parent?: any): T;
-  write?: (ctx: EbinContext, value: T, parent?: any) => void;
-  preWrite?: (value: T, parent: any) => void;
+  write?(ctx: EbinContext, value: T, parent?: any): void;
+  preWrite?(value: T, parent: any): void;
 }
 
 export interface BaseSchema<T = any, TProcessed = T> {
@@ -16,8 +23,10 @@ export interface BaseSchema<T = any, TProcessed = T> {
   readonly lookups?: Record<string, LookupField<any> | undefined>;
   defaultValue?: T;
 
-  getSize(value?: TProcessed, parent?: any): number;
+  clone(): this;
+  compile(options?: ISchemaCompileOptions | undefined): void;
 
+  getSize(value?: TProcessed, parent?: any): number;
   read(ctx: EbinContext, parent?: any): T;
   write(ctx: EbinContext, value: TProcessed, parent?: any): void;
 

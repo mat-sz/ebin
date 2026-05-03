@@ -11,17 +11,41 @@ const TEST_CASES: TestCase<any>[] = [
     tests: [
       {
         decoded: { array: [1, 2, 3] },
-        encoded: [0, 6, 0, 1, 0, 2, 0, 3],
+        encoded: [0x00, 0x06, 0x00, 0x01, 0x00, 0x02, 0x00, 0x03],
       },
     ],
   },
   {
-    label: 'size-prefiexd',
+    label: 'size-prefixed',
     schema: e.array(e.uint16()).size(e.uint16()),
     tests: [
       {
         decoded: [1, 2, 3],
-        encoded: [0, 6, 0, 1, 0, 2, 0, 3],
+        encoded: [0x00, 0x06, 0x00, 0x01, 0x00, 0x02, 0x00, 0x03],
+      },
+    ],
+  },
+  {
+    label: 'size-prefixed (little-endian array)',
+    schema: e.array(e.uint16()).size(e.uint16()).littleEndian(),
+    tests: [
+      {
+        decoded: [1, 2, 3],
+        encoded: [0x06, 0x00, 0x01, 0x00, 0x02, 0x00, 0x03, 0x00],
+      },
+    ],
+  },
+  {
+    label: 'size-prefixed (little-endian parent)',
+    schema: e
+      .struct({
+        data: e.array(e.uint16()).size(e.uint16()),
+      })
+      .littleEndian(),
+    tests: [
+      {
+        decoded: { data: [1, 2, 3] },
+        encoded: [0x06, 0x00, 0x01, 0x00, 0x02, 0x00, 0x03, 0x00],
       },
     ],
   },
@@ -34,17 +58,41 @@ const TEST_CASES: TestCase<any>[] = [
     tests: [
       {
         decoded: { array: [1, 2, 3] },
-        encoded: [0, 3, 0, 1, 0, 2, 0, 3],
+        encoded: [0x00, 0x03, 0x00, 0x01, 0x00, 0x02, 0x00, 0x03],
       },
     ],
   },
   {
-    label: 'count-prefiexd',
+    label: 'count-prefixed',
     schema: e.array(e.uint16()).count(e.uint16()),
     tests: [
       {
         decoded: [1, 2, 3],
-        encoded: [0, 3, 0, 1, 0, 2, 0, 3],
+        encoded: [0x00, 0x03, 0x00, 0x01, 0x00, 0x02, 0x00, 0x03],
+      },
+    ],
+  },
+  {
+    label: 'count-prefixed (little-endian array)',
+    schema: e.array(e.uint16()).count(e.uint16()).littleEndian(),
+    tests: [
+      {
+        decoded: [1, 2, 3],
+        encoded: [0x03, 0x00, 0x01, 0x00, 0x02, 0x00, 0x03, 0x00],
+      },
+    ],
+  },
+  {
+    label: 'count-prefixed (little-endian parent)',
+    schema: e
+      .struct({
+        data: e.array(e.uint16()).count(e.uint16()),
+      })
+      .littleEndian(),
+    tests: [
+      {
+        decoded: { data: [1, 2, 3] },
+        encoded: [0x03, 0x00, 0x01, 0x00, 0x02, 0x00, 0x03, 0x00],
       },
     ],
   },

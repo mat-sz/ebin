@@ -1,7 +1,6 @@
 import type { TypedArray } from './types.js';
 
 export class EbinContext {
-  littleEndian = false;
   offset = 0;
   array: Uint8Array;
 

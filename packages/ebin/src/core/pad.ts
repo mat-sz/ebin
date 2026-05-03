@@ -1,13 +1,28 @@
 import type { EbinContext } from '../context.js';
-import type { BaseSchema } from '../types.js';
+import type { BaseSchema, ISchemaCompileOptions } from '../types.js';
 import { AnySchema } from './any.js';
 
 class PadSchema<T, TProcessed = T> extends AnySchema<T, TProcessed> {
+  private itemType: BaseSchema<T, TProcessed>;
+
   constructor(
-    private itemType: BaseSchema<T, TProcessed>,
+    itemType: BaseSchema<T, TProcessed>,
     private blockSize: number,
   ) {
     super();
+
+    this.itemType = itemType.clone();
+  }
+
+  clone() {
+    const clone = new PadSchema(this.itemType, this.blockSize);
+    return clone as this;
+  }
+
+  compile(options?: ISchemaCompileOptions) {
+    this.itemType.compile(options);
+
+    super.compile();
   }
 
   get isConstantSize() {

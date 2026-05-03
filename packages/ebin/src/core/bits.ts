@@ -1,6 +1,5 @@
 import { ConstantSizeSchema } from './any.js';
 
-// TODO: Set a limit?
 type BitsFields = Record<string, number>;
 
 type BitsObject<TSchema extends BitsFields> = {
@@ -11,8 +10,6 @@ class BitsSchema<
   TFields extends BitsFields,
   TObject extends BitsObject<TFields> = BitsObject<TFields>,
 > extends ConstantSizeSchema<TObject> {
-  private fieldEntries;
-
   constructor(protected fields: TFields) {
     let bitSize = 0;
     for (const fieldSize of Object.values(fields)) {
@@ -21,12 +18,15 @@ class BitsSchema<
     const size = Math.ceil(bitSize / 8);
 
     super(size);
-
-    this.fieldEntries = Object.entries(fields) as [keyof TObject, number][];
-    this.generateFn();
   }
 
-  protected generateFn() {
+  clone() {
+    const clone = new BitsSchema(this.fields);
+    return clone as this;
+  }
+
+  compile() {
+    const fieldEntries = Object.entries(this.fields);
     const longCount = Math.floor(this.size / 4);
     const lastSize = (this.size % 4) * 8;
 
@@ -41,7 +41,7 @@ class BitsSchema<
       const offset = ctx.offset;
       ${vars.map((size, i) => `const i${i} = ctx.view.getUint${size}(offset + ${i * 4});`).join('')}
       ctx.offset += ${this.size};
-      ${this.generateBitsRead(vars)}
+      ${this.generateBitsRead(fieldEntries, vars)}
       `,
     ).bind(this);
     this.write = new Function(
@@ -49,19 +49,21 @@ class BitsSchema<
       'value',
       `"use strict";
       const offset = ctx.offset;
-      ${this.generateBitsWrite(vars)}
+      ${this.generateBitsWrite(fieldEntries, vars)}
       ctx.offset += ${this.size};
       `,
     ).bind(this);
+
+    super.compile();
   }
 
-  private generateBitsRead(vars: number[]) {
+  private generateBitsRead(fieldEntries: [string, number][], vars: number[]) {
     let out = 'return { ';
 
     let varIndex = 0;
     let bitOffset = 0;
 
-    for (const [key, fieldSize] of this.fieldEntries) {
+    for (const [key, fieldSize] of fieldEntries) {
       const varSize = vars[varIndex];
       if (!varSize) {
         throw new Error("We're out of data.");
@@ -103,7 +105,7 @@ class BitsSchema<
     return `${out} };`;
   }
 
-  private generateBitsWrite(vars: number[]) {
+  private generateBitsWrite(fieldEntries: [string, number][], vars: number[]) {
     let out = '';
     let fieldIndex = 0;
     let fieldOffset = 0;
@@ -116,7 +118,7 @@ class BitsSchema<
       let varSet = `ctx.view.setUint${varSize}(offset + ${offset}, `;
 
       while (remainingVarSize > 0) {
-        const field = this.fieldEntries[fieldIndex];
+        const field = fieldEntries[fieldIndex];
         if (!field) {
           break;
         }
@@ -149,12 +151,6 @@ class BitsSchema<
 
     return out;
   }
-
-  read() {
-    return {} as any;
-  }
-
-  write() {}
 }
 
 export function bits<TFields extends BitsFields>(fields: TFields): BitsSchema<TFields> {

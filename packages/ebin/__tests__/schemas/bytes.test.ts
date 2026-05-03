@@ -26,6 +26,20 @@ const TEST_CASES: TestCase<any>[] = [
     ],
   },
   {
+    label: 'size-prefixed (little-endian parent)',
+    schema: e
+      .struct({
+        data: e.arrayBuffer().size(e.uint16()),
+      })
+      .littleEndian(),
+    tests: [
+      {
+        decoded: { data: new Uint8Array([0xff, 0xee, 0xdd, 0xcc]).buffer },
+        encoded: [0x04, 0x00, 0xff, 0xee, 0xdd, 0xcc],
+      },
+    ],
+  },
+  {
     label: 'fixed size',
     schema: e.arrayBuffer().size(4),
     tests: [

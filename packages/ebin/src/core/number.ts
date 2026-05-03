@@ -1,4 +1,5 @@
 import type { EbinContext } from '../context.js';
+import type { ISchemaCompileOptions } from '../types.js';
 import { fn } from '../utils/codegen.js';
 import { fromFloat16, IS_FP16_SUPPORTED, toFloat16 } from '../utils/float16.js';
 import { ConstantSizeSchema, SchemaWithEndianness } from './any.js';
@@ -11,40 +12,36 @@ class NumberSchema<T extends bigint | number> extends SchemaWithEndianness<T> {
     protected readonly viewSuffix: string,
   ) {
     super();
-    this.generateFn();
   }
 
-  protected generateFn() {
-    const hasEndianness = typeof this._littleEndian !== 'undefined';
+  clone() {
+    const clone = new NumberSchema(this.size, this.viewSuffix);
+    return clone as this;
+  }
+
+  compile(options?: ISchemaCompileOptions) {
+    const littleEndian = this._littleEndian ?? options?.littleEndian ?? undefined;
 
     if (this.viewSuffix === 'Float16' && !IS_FP16_SUPPORTED) {
       this.read = ((ctx: EbinContext) => {
-        return fromFloat16(ctx.view.getUint16(ctx.forward(2), this._littleEndian ?? ctx.littleEndian));
+        return fromFloat16(ctx.view.getUint16(ctx.forward(2), littleEndian));
       }) as any;
       this.write = ((ctx: EbinContext, value: number) => {
-        ctx.view.setUint16(ctx.forward(2), toFloat16(value), this._littleEndian ?? ctx.littleEndian);
+        ctx.view.setUint16(ctx.forward(2), toFloat16(value), littleEndian);
       }) as any;
       return;
     }
 
     this.read = fn('ctx')
-      .line(
-        `return ctx.view.get${this.viewSuffix}(ctx.forward(${this.size}), ${hasEndianness ? JSON.stringify(this._littleEndian) : 'ctx.littleEndian'});`,
-      )
+      .line(`return ctx.view.get${this.viewSuffix}(ctx.forward(${this.size}), ${JSON.stringify(littleEndian)});`)
       .generate(this);
 
     this.write = fn('ctx', 'value')
-      .line(
-        `ctx.view.set${this.viewSuffix}(ctx.forward(${this.size}), value, ${hasEndianness ? JSON.stringify(this._littleEndian) : 'ctx.littleEndian'});`,
-      )
+      .line(`ctx.view.set${this.viewSuffix}(ctx.forward(${this.size}), value, ${JSON.stringify(littleEndian)});`)
       .generate(this);
-  }
 
-  read() {
-    return 0 as any;
+    super.compile();
   }
-
-  write() {}
 
   getSize() {
     return this.size;
@@ -54,10 +51,14 @@ class NumberSchema<T extends bigint | number> extends SchemaWithEndianness<T> {
 class ByteNumberSchema extends ConstantSizeSchema<number> {
   constructor(protected readonly viewSuffix: string) {
     super(1);
-    this.generateFn();
   }
 
-  protected generateFn() {
+  clone() {
+    const clone = new ByteNumberSchema(this.viewSuffix);
+    return clone as this;
+  }
+
+  compile() {
     this.read = new Function(
       'ctx',
       `"use strict";
@@ -71,13 +72,9 @@ class ByteNumberSchema extends ConstantSizeSchema<number> {
        ctx.view.set${this.viewSuffix}(ctx.offset++, value);
        `,
     ).bind(this);
-  }
 
-  read() {
-    return 0;
+    super.compile();
   }
-
-  write() {}
 }
 
 export function int8() {

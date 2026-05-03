@@ -1,5 +1,5 @@
 import type { EbinContext } from '../context.js';
-import type { BaseSchema, LookupField } from '../types.js';
+import type { BaseSchema, ISchemaCompileOptions, LookupField } from '../types.js';
 
 export class LookupFieldParent<T> implements LookupField<T> {
   readonly dependsOnParent = true;
@@ -7,6 +7,11 @@ export class LookupFieldParent<T> implements LookupField<T> {
   readonly isConstant = false;
 
   constructor(public readonly parentField: string) {}
+
+  clone(): this {
+    const clone = new LookupFieldParent<T>(this.parentField);
+    return clone as this;
+  }
 
   read(_: EbinContext, parent?: any) {
     return parent?.[this.parentField];
@@ -24,6 +29,11 @@ export class LookupFieldConstant<T> implements LookupField<T> {
 
   constructor(private value: T) {}
 
+  clone(): this {
+    const clone = new LookupFieldConstant<T>(this.value);
+    return clone as this;
+  }
+
   read() {
     return this.value;
   }
@@ -31,11 +41,26 @@ export class LookupFieldConstant<T> implements LookupField<T> {
 
 export class LookupFieldPrefix<T> implements LookupField<T> {
   readonly dependsOnParent = false;
+  schema: BaseSchema<T>;
   size = 0;
   readonly isConstant = false;
 
-  constructor(private schema: BaseSchema<T>) {
-    this.size = schema.getSize();
+  constructor(schema: BaseSchema<T>) {
+    this.schema = schema.clone();
+    if (!this.schema.isConstantSize) {
+      throw new Error('Lookup field schema must be constant size.');
+    }
+
+    this.size = this.schema.getSize();
+  }
+
+  clone(): this {
+    const clone = new LookupFieldPrefix<T>(this.schema);
+    return clone as this;
+  }
+
+  compile(options?: ISchemaCompileOptions) {
+    this.schema.compile(options);
   }
 
   read(ctx: EbinContext, parent?: any) {

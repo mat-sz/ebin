@@ -1,4 +1,4 @@
-import type { BaseSchema, ExcludeMatchingProperties, SchemaValue } from '../types.js';
+import type { BaseSchema, ExcludeMatchingProperties, ISchemaCompileOptions, SchemaValue } from '../types.js';
 import { fn } from '../utils/codegen.js';
 import { SchemaWithEndianness } from './any.js';
 
@@ -18,22 +18,34 @@ class StructSchema<
   TObject = StructObject<TFields>,
 > extends SchemaWithEndianness<TObject> {
   isConstantSize = false;
-  private fieldEntries;
+  protected fields: TFields;
 
-  constructor(protected fields: TFields) {
+  constructor(fields: TFields) {
     super();
-    this.fieldEntries = Object.entries(fields) as [keyof TObject, BaseSchema][];
 
-    this.generateFn();
+    this.fields = Object.fromEntries(Object.entries(fields).map(([key, value]) => [key, value.clone()])) as TFields;
   }
 
-  protected generateFn() {
-    const hasParentDependencies = this.fieldEntries.some(
+  clone() {
+    const clone = new StructSchema(this.fields);
+    clone._littleEndian = this._littleEndian;
+    return clone as this;
+  }
+
+  compile(options?: ISchemaCompileOptions) {
+    const fieldEntries = Object.entries(this.fields) as [keyof TObject, BaseSchema][];
+    for (const [_, field] of fieldEntries) {
+      field.compile?.({
+        ...options,
+        littleEndian: this._littleEndian ?? options?.littleEndian,
+      });
+    }
+
+    const hasParentDependencies = fieldEntries.some(
       ([_, field]) => field.lookups && Object.values(field.lookups).some((lookup) => lookup?.parentField),
     );
-    const hasEndianness = typeof this._littleEndian !== 'undefined';
-    const constantSizeFields = this.fieldEntries.filter(([_, field]) => field.isConstantSize);
-    const dynamicSizeFields = this.fieldEntries.filter(([_, field]) => !field.isConstantSize);
+    const constantSizeFields = fieldEntries.filter(([_, field]) => field.isConstantSize);
+    const dynamicSizeFields = fieldEntries.filter(([_, field]) => !field.isConstantSize);
     const dynamicSizeFieldKeys = dynamicSizeFields.map(([key]) => JSON.stringify(key));
     this.isConstantSize = dynamicSizeFields.length === 0;
     let constantSize = 0;
@@ -56,13 +68,9 @@ class StructSchema<
       ).bind(this);
     }
 
-    const fields = this.fieldEntries.map(([key, field]) => [JSON.stringify(key), field] as const);
+    const fields = fieldEntries.map(([key, field]) => [JSON.stringify(key), field] as const);
 
     const readBuilder = fn('ctx');
-    if (hasEndianness) {
-      readBuilder.line('var littleEndian = ctx.littleEndian;');
-      readBuilder.line(`ctx.littleEndian = ${this._littleEndian};`);
-    }
 
     if (hasParentDependencies) {
       readBuilder.line('var obj = {};');
@@ -77,19 +85,11 @@ class StructSchema<
       readBuilder.line('};');
     }
 
-    if (hasEndianness) {
-      readBuilder.line('ctx.littleEndian = littleEndian;');
-    }
-
     readBuilder.line('return obj;');
 
     this.read = readBuilder.generate(this);
 
     const writeBuilder = fn('ctx', 'value');
-    if (hasEndianness) {
-      writeBuilder.line('var littleEndian = ctx.littleEndian;');
-      writeBuilder.line(`ctx.littleEndian = ${this._littleEndian};`);
-    }
 
     for (const [key, field] of fields) {
       if (!field._writePrepare) {
@@ -103,10 +103,6 @@ class StructSchema<
       writeBuilder.line(
         `this.fields[${key}].write(ctx, value[${key}]${typeof field.defaultValue !== 'undefined' ? ` ?? this.fields[${key}].defaultValue` : ''}, value);`,
       );
-    }
-
-    if (hasEndianness) {
-      writeBuilder.line('ctx.littleEndian = littleEndian;');
     }
 
     this.write = writeBuilder.generate(this);
@@ -124,17 +120,9 @@ class StructSchema<
     } else {
       this._writePreprocess = undefined;
     }
-  }
 
-  getSize() {
-    return 0;
+    super.compile();
   }
-
-  read(): Required<TObject> {
-    return {} as any;
-  }
-
-  write() {}
 }
 
 export function struct<TFields extends StructFields>(fields: TFields): StructSchema<TFields> {

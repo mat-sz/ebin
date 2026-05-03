@@ -1,5 +1,5 @@
 import type { EbinContext } from '../context.js';
-import type { LookupField } from '../types.js';
+import type { ISchemaCompileOptions, LookupField } from '../types.js';
 import { createNumberLookupField, type NumberLookupFieldParamType } from '../utils/lookupField.js';
 import { textEncodings } from '../utils/textEncoding/index.js';
 import { AnySchema } from './any.js';
@@ -13,6 +13,19 @@ class StringSchema extends AnySchema<string> {
   } = {};
   private _encoding = textEncodings[ENCODING];
 
+  clone() {
+    const clone = new StringSchema();
+    clone.lookups = this.cloneLookups();
+    return clone as this;
+  }
+
+  compile(options?: ISchemaCompileOptions) {
+    this.lookups.size?.compile?.(options);
+    this.isConstantSize = !!this.lookups.size?.isConstant;
+
+    super.compile();
+  }
+
   getSize(value: string) {
     const sizeLookup = this.lookups.size;
     if (!sizeLookup?.size) {
@@ -20,7 +33,6 @@ class StringSchema extends AnySchema<string> {
     }
 
     if (sizeLookup.isConstant) {
-      // TODO: Fix.
       return sizeLookup.read(undefined as any);
     }
 
@@ -28,9 +40,7 @@ class StringSchema extends AnySchema<string> {
   }
 
   size(field: NumberLookupFieldParamType): this {
-    const sizeLookup = createNumberLookupField(field);
-    this.lookups.size = sizeLookup;
-    this.isConstantSize = sizeLookup.isConstant;
+    this.lookups.size = createNumberLookupField(field);
     return this;
   }
 
