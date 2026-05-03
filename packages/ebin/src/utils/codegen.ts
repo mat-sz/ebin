@@ -16,7 +16,7 @@ export class FunctionBuilder {
     return this;
   }
 
-  generate(self: any): any {
+  generate(self: unknown): any {
     return new Function(...this.args, this.body).bind(self);
   }
 }

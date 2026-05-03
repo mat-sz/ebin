@@ -1,8 +1,8 @@
-import type { BaseSchema, ExcludeMatchingProperties, ISchemaCompileOptions, SchemaValue } from '../types.js';
+import type { ExcludeMatchingProperties, SchemaCompileOptions } from '../types.js';
 import { fn } from '../utils/codegen.js';
-import { SchemaWithEndianness } from './any.js';
+import { type Schema, type SchemaValue, SchemaWithEndianness } from './schema.js';
 
-type StructFields = Record<string, BaseSchema<any>>;
+type StructFields = Record<string, Schema>;
 
 type StructObject<S extends StructFields> = Partial<
   ExcludeMatchingProperties<
@@ -13,11 +13,9 @@ type StructObject<S extends StructFields> = Partial<
   >
 >;
 
-class StructSchema<
-  TFields extends StructFields,
-  TObject = StructObject<TFields>,
-> extends SchemaWithEndianness<TObject> {
+class StructSchema<TFields extends StructFields> extends SchemaWithEndianness<StructObject<TFields>> {
   isConstantSize = false;
+  lookups = undefined;
   protected fields: TFields;
 
   constructor(fields: TFields) {
@@ -28,21 +26,21 @@ class StructSchema<
 
   clone() {
     const clone = new StructSchema(this.fields);
-    clone._littleEndian = this._littleEndian;
+    clone.isLE = this.isLE;
     return clone as this;
   }
 
-  compile(options?: ISchemaCompileOptions) {
-    const fieldEntries = Object.entries(this.fields) as [keyof TObject, BaseSchema][];
+  compile(options?: SchemaCompileOptions) {
+    const fieldEntries = Object.entries(this.fields);
     for (const [_, field] of fieldEntries) {
       field.compile?.({
         ...options,
-        littleEndian: this._littleEndian ?? options?.littleEndian,
+        isLE: this.isLE ?? options?.isLE,
       });
     }
 
     const hasParentDependencies = fieldEntries.some(
-      ([_, field]) => field.lookups && Object.values(field.lookups).some((lookup) => lookup?.parentField),
+      ([_, field]) => field.lookups && Object.values(field.lookups).some((lookup) => lookup?.dependsOnParent),
     );
     const constantSizeFields = fieldEntries.filter(([_, field]) => field.isConstantSize);
     const dynamicSizeFields = fieldEntries.filter(([_, field]) => !field.isConstantSize);
@@ -125,6 +123,6 @@ class StructSchema<
   }
 }
 
-export function struct<TFields extends StructFields>(fields: TFields): StructSchema<TFields> {
+export function struct<Fields extends StructFields>(fields: Fields): StructSchema<Fields> {
   return new StructSchema(fields);
 }

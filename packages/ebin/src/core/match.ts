@@ -1,30 +1,27 @@
 import type { EbinContext } from '../context.js';
-import type { BaseSchema, ISchemaCompileOptions, LookupField, SchemaValue } from '../types.js';
-import { LookupFieldParent } from '../utils/lookupField.js';
-import { AnySchema } from './any.js';
+import type { SchemaCompileOptions } from '../types.js';
+import { type LookupField, LookupFieldParent } from '../utils/lookupField.js';
+import { Schema, type SchemaValue } from './schema.js';
 
-type MatchCases<TSchemaType> = Record<string, BaseSchema<TSchemaType>>;
+type MatchCases<T> = Record<string, Schema<T>>;
 type MatchObject<T extends MatchCases<any>> = T extends MatchCases<infer U> ? U : never;
 
-class MatchSchema<
-  TCases extends MatchCases<any>,
-  TObject = SchemaValue<MatchObject<TCases>>,
-> extends AnySchema<TObject> {
+class MatchSchema<Cases extends MatchCases<any>, T = SchemaValue<MatchObject<Cases>>> extends Schema<T> {
   isConstantSize = false;
   lookups: {
     match: LookupField<number>;
   };
-  cases: TCases;
+  cases: Cases;
 
   constructor(
     readonly matchField: string,
-    cases: TCases,
+    cases: Cases,
   ) {
     super();
     this.lookups = {
       match: new LookupFieldParent<number>(matchField),
     };
-    this.cases = Object.fromEntries(Object.entries(cases).map(([key, value]) => [key, value.clone()])) as TCases;
+    this.cases = Object.fromEntries(Object.entries(cases).map(([key, value]) => [key, value.clone()])) as Cases;
   }
 
   clone() {
@@ -32,34 +29,34 @@ class MatchSchema<
     return clone as this;
   }
 
-  compile(options?: ISchemaCompileOptions) {
+  compile(options?: SchemaCompileOptions) {
     this.lookups.match.compile?.(options);
 
     super.compile();
   }
 
-  getSize(value: TObject, parent?: any) {
+  getSize(value: T, parent?: unknown) {
     const matchValue = this.lookups.match.read(undefined as any, parent);
     return this.cases[matchValue].getSize(value, parent);
   }
 
-  read(ctx: EbinContext, parent?: any) {
+  read(ctx: EbinContext, parent?: unknown) {
     const matchValue = this.lookups.match.read(undefined as any, parent);
     return this.cases[matchValue].read(ctx, parent);
   }
 
-  write(ctx: EbinContext, value: TObject, parent?: any) {
+  write(ctx: EbinContext, value: T, parent?: unknown) {
     const matchValue = this.lookups.match.read(undefined as any, parent);
     this.cases[matchValue].write(ctx, value, parent);
   }
 
-  _writePrepare?(value: TObject, parent?: any): any {
+  _writePrepare?(value: T, parent?: unknown) {
     const matchValue = this.lookups.match.read(undefined as any, parent);
     const schema = this.cases[matchValue];
     return schema._writePrepare ? schema._writePrepare(value, parent) : value;
   }
 
-  _writePreprocess?(value: TObject, parent?: any): any {
+  _writePreprocess?(value: T, parent?: unknown) {
     const matchValue = this.lookups.match.read(undefined as any, parent);
     const schema = this.cases[matchValue];
     return schema._writePreprocess ? schema._writePreprocess(value, parent) : value;

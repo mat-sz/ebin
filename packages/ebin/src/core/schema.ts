@@ -1,26 +1,30 @@
 import { EbinContext } from '../context.js';
-import type { BaseSchema, LookupField, TypedArray } from '../types.js';
+import type { SchemaCompileOptions, TypedArray } from '../types.js';
+import type { LookupField } from '../utils/lookupField.js';
 
-export abstract class AnySchema<T, TProcessed = T> implements BaseSchema<T, TProcessed> {
-  readonly TYPE!: T;
+export type SchemaValue<T extends Schema> = T['valueType'];
+
+export abstract class Schema<T = unknown, TProcessed = T> {
+  readonly valueType!: T;
   abstract get isConstantSize(): boolean;
+  abstract get lookups(): Record<string, LookupField<unknown> | undefined> | undefined;
 
   defaultValue?: T;
 
   abstract clone(): this;
 
-  _writePreprocess?(value: T, parent?: any): TProcessed;
-  _writePrepare?(value: TProcessed, parent?: any): void;
+  _writePreprocess?(value: T, parent?: unknown): TProcessed;
+  _writePrepare?(value: TProcessed, parent?: unknown): void;
 
-  protected cloneLookups(): any {
-    if (!('lookups' in this) || !this.lookups) {
+  protected cloneLookups(): this['lookups'] {
+    if (!this.lookups) {
       return undefined;
     }
 
-    const lookups = this.lookups as Record<string, LookupField<any> | undefined>;
-    return Object.fromEntries(Object.entries(lookups).map(([key, value]) => [key, value?.clone()]));
+    return Object.fromEntries(Object.entries(this.lookups).map(([key, value]) => [key, value?.clone()]));
   }
 
+  compile(options?: SchemaCompileOptions | undefined): void;
   compile() {
     if (this._writePreprocess) {
       this.toArrayBuffer = (value: T) => {
@@ -31,24 +35,24 @@ export abstract class AnySchema<T, TProcessed = T> implements BaseSchema<T, TPro
       };
     } else {
       this.toArrayBuffer = (value: T) => {
-        var buffer = new ArrayBuffer(this.getSize(value as any));
-        this.write(EbinContext.fromArrayBuffer(buffer), value as any);
+        var buffer = new ArrayBuffer(this.getSize(value as unknown as TProcessed));
+        this.write(EbinContext.fromArrayBuffer(buffer), value as unknown as TProcessed);
         return buffer;
       };
     }
   }
 
-  read(ctx: EbinContext, parent?: any): T {
+  read(ctx: EbinContext, parent?: unknown): T {
     this.compile();
     return this.read(ctx, parent);
   }
 
-  write(ctx: EbinContext, value: TProcessed, parent?: any) {
+  write(ctx: EbinContext, value: TProcessed, parent?: unknown) {
     this.compile();
     this.write(ctx, value, parent);
   }
 
-  getSize(value?: TProcessed, parent?: any): number {
+  getSize(value?: TProcessed, parent?: unknown): number {
     this.compile();
     return this.getSize(value, parent);
   }
@@ -76,7 +80,7 @@ export abstract class AnySchema<T, TProcessed = T> implements BaseSchema<T, TPro
   }
 }
 
-export abstract class ConstantSizeSchema<T> extends AnySchema<T> {
+export abstract class ConstantSizeSchema<T> extends Schema<T> {
   isConstantSize = true;
 
   constructor(public readonly size: number) {
@@ -88,16 +92,24 @@ export abstract class ConstantSizeSchema<T> extends AnySchema<T> {
   }
 }
 
-export abstract class SchemaWithEndianness<T> extends AnySchema<T> {
-  protected _littleEndian?: boolean;
+export abstract class SchemaWithEndianness<T, TProcessed = T> extends Schema<T, TProcessed> {
+  protected isLE?: boolean = undefined;
 
   littleEndian(): this {
-    this._littleEndian = true;
+    this.isLE = true;
     return this;
   }
 
   bigEndian(): this {
-    this._littleEndian = false;
+    this.isLE = false;
     return this;
+  }
+
+  le(): this {
+    return this.littleEndian();
+  }
+
+  be(): this {
+    return this.bigEndian();
   }
 }

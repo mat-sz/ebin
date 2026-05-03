@@ -1,12 +1,12 @@
 import type { EbinContext } from '../context.js';
-import type { ISchemaCompileOptions, LookupField } from '../types.js';
-import { createNumberLookupField, type NumberLookupFieldParamType } from '../utils/lookupField.js';
+import type { SchemaCompileOptions } from '../types.js';
+import { createNumberLookupField, type LookupField, type NumberLookupFieldParamType } from '../utils/lookupField.js';
 import { textEncodings } from '../utils/textEncoding/index.js';
-import { AnySchema } from './any.js';
+import { Schema } from './schema.js';
 
 const ENCODING = 'utf8';
 
-class StringSchema extends AnySchema<string> {
+class StringSchema extends Schema<string> {
   isConstantSize = false;
   lookups: {
     size?: LookupField<number>;
@@ -19,7 +19,7 @@ class StringSchema extends AnySchema<string> {
     return clone as this;
   }
 
-  compile(options?: ISchemaCompileOptions) {
+  compile(options?: SchemaCompileOptions) {
     this.lookups.size?.compile?.(options);
     this.isConstantSize = !!this.lookups.size?.isConstant;
 
@@ -44,7 +44,7 @@ class StringSchema extends AnySchema<string> {
     return this;
   }
 
-  read(ctx: EbinContext, parent?: any) {
+  read(ctx: EbinContext, parent?: unknown) {
     const size = this.lookups.size?.read(ctx, parent) ?? ctx.view.byteLength - ctx.offset;
 
     const buffer = ctx.bytes(size);
@@ -58,7 +58,7 @@ class StringSchema extends AnySchema<string> {
     this._encoding.encode(value, ctx.bytes(byteLength));
   }
 
-  _writePrepare(value: string, parent: any) {
+  _writePrepare(value: string, parent: unknown) {
     this.lookups.size?.preWrite?.(this._encoding.getSize(value), parent);
   }
 }

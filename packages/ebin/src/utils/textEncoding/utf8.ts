@@ -83,7 +83,7 @@ export function decode(input: Uint8Array): string {
     }
   }
 
-  return String.fromCharCode.apply(String, out as any);
+  return String.fromCharCode.apply(String, out);
 }
 
 const TEXT_ENCODER_THRESHOLD = 50;

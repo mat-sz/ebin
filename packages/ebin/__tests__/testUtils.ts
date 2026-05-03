@@ -1,8 +1,8 @@
-import type { AnySchema } from '../src/core/any.js';
+import type { Schema } from '../src/core/schema.js';
 
-export interface TestCase<T> {
+export interface TestCase<T = unknown> {
   label: string;
-  schema: AnySchema<T>;
+  schema: Schema<T>;
   tests: {
     decoded: T | (() => T);
     encoded: number[];
@@ -17,7 +17,7 @@ function getValue(value: any | (() => any)) {
   return value;
 }
 
-export function runTestCases(testCases: TestCase<any>[]) {
+export function runTestCases(testCases: TestCase[]) {
   for (const testCase of testCases) {
     describe(testCase.label, () => {
       it('should serialize correctly', () => {

@@ -1,7 +1,9 @@
 import type { EbinContext } from '../context.js';
-import { ConstantSizeSchema } from './any.js';
+import { ConstantSizeSchema } from './schema.js';
 
 class SkipSchema extends ConstantSizeSchema<never> {
+  lookups = undefined;
+
   clone() {
     const clone = new SkipSchema(this.size);
     return clone as this;

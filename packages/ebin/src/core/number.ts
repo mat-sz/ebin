@@ -1,11 +1,12 @@
 import type { EbinContext } from '../context.js';
-import type { ISchemaCompileOptions } from '../types.js';
+import type { SchemaCompileOptions } from '../types.js';
 import { fn } from '../utils/codegen.js';
 import { fromFloat16, IS_FP16_SUPPORTED, toFloat16 } from '../utils/float16.js';
-import { ConstantSizeSchema, SchemaWithEndianness } from './any.js';
+import { ConstantSizeSchema, SchemaWithEndianness } from './schema.js';
 
 class NumberSchema<T extends bigint | number> extends SchemaWithEndianness<T> {
   isConstantSize = true;
+  lookups = undefined;
 
   constructor(
     public readonly size: number,
@@ -19,26 +20,24 @@ class NumberSchema<T extends bigint | number> extends SchemaWithEndianness<T> {
     return clone as this;
   }
 
-  compile(options?: ISchemaCompileOptions) {
-    const littleEndian = this._littleEndian ?? options?.littleEndian ?? undefined;
+  compile(options?: SchemaCompileOptions) {
+    const isLE = this.isLE ?? options?.isLE ?? undefined;
 
     if (this.viewSuffix === 'Float16' && !IS_FP16_SUPPORTED) {
-      this.read = ((ctx: EbinContext) => {
-        return fromFloat16(ctx.view.getUint16(ctx.forward(2), littleEndian));
-      }) as any;
-      this.write = ((ctx: EbinContext, value: number) => {
-        ctx.view.setUint16(ctx.forward(2), toFloat16(value), littleEndian);
-      }) as any;
-      return;
+      this.read = (ctx: EbinContext) => {
+        return fromFloat16(ctx.view.getUint16(ctx.forward(2), isLE)) as T;
+      };
+      this.write = (ctx: EbinContext, value: T) => {
+        ctx.view.setUint16(ctx.forward(2), toFloat16(value as number), isLE);
+      };
+    } else {
+      this.read = fn('ctx')
+        .line(`return ctx.view.get${this.viewSuffix}(ctx.forward(${this.size}), ${JSON.stringify(isLE)});`)
+        .generate(this);
+      this.write = fn('ctx', 'value')
+        .line(`ctx.view.set${this.viewSuffix}(ctx.forward(${this.size}), value, ${JSON.stringify(isLE)});`)
+        .generate(this);
     }
-
-    this.read = fn('ctx')
-      .line(`return ctx.view.get${this.viewSuffix}(ctx.forward(${this.size}), ${JSON.stringify(littleEndian)});`)
-      .generate(this);
-
-    this.write = fn('ctx', 'value')
-      .line(`ctx.view.set${this.viewSuffix}(ctx.forward(${this.size}), value, ${JSON.stringify(littleEndian)});`)
-      .generate(this);
 
     super.compile();
   }
@@ -49,6 +48,8 @@ class NumberSchema<T extends bigint | number> extends SchemaWithEndianness<T> {
 }
 
 class ByteNumberSchema extends ConstantSizeSchema<number> {
+  lookups = undefined;
+
   constructor(protected readonly viewSuffix: string) {
     super(1);
   }

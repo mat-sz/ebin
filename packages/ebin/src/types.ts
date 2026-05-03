@@ -1,37 +1,5 @@
-import type { EbinContext } from './context.js';
-
-export interface ISchemaCompileOptions {
-  littleEndian?: boolean;
-}
-
-export interface LookupField<T> {
-  readonly size: number;
-  readonly isConstant: boolean;
-  readonly parentField?: string;
-
-  clone(): this;
-  compile?(options?: ISchemaCompileOptions | undefined): void;
-
-  read(ctx: EbinContext, parent?: any): T;
-  write?(ctx: EbinContext, value: T, parent?: any): void;
-  preWrite?(value: T, parent: any): void;
-}
-
-export interface BaseSchema<T = any, TProcessed = T> {
-  readonly TYPE: T;
-  readonly isConstantSize: boolean;
-  readonly lookups?: Record<string, LookupField<any> | undefined>;
-  defaultValue?: T;
-
-  clone(): this;
-  compile(options?: ISchemaCompileOptions | undefined): void;
-
-  getSize(value?: TProcessed, parent?: any): number;
-  read(ctx: EbinContext, parent?: any): T;
-  write(ctx: EbinContext, value: TProcessed, parent?: any): void;
-
-  _writePreprocess?(value: T, parent?: any): TProcessed;
-  _writePrepare?(value: TProcessed, parent?: any): void;
+export interface SchemaCompileOptions {
+  isLE?: boolean;
 }
 
 export type TypedArray =
@@ -46,8 +14,6 @@ export type TypedArray =
   | Float64Array
   | BigInt64Array
   | BigUint64Array;
-
-export type SchemaValue<T extends BaseSchema<any>> = T['TYPE'];
 
 export type ExcludeMatchingProperties<T, V> = Pick<T, { [K in keyof T]-?: T[K] extends V ? never : K }[keyof T]>;
 

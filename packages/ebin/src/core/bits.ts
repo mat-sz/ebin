@@ -1,16 +1,13 @@
-import { ConstantSizeSchema } from './any.js';
+import { ConstantSizeSchema } from './schema.js';
 
 type BitsFields = Record<string, number>;
 
-type BitsObject<TSchema extends BitsFields> = {
-  [K in keyof TSchema]: number;
-};
+class BitsSchema<T extends Record<string, number>> extends ConstantSizeSchema<{
+  [K in keyof T]: number;
+}> {
+  lookups = undefined;
 
-class BitsSchema<
-  TFields extends BitsFields,
-  TObject extends BitsObject<TFields> = BitsObject<TFields>,
-> extends ConstantSizeSchema<TObject> {
-  constructor(protected fields: TFields) {
+  constructor(protected fields: T) {
     let bitSize = 0;
     for (const fieldSize of Object.values(fields)) {
       bitSize += fieldSize;
@@ -153,6 +150,6 @@ class BitsSchema<
   }
 }
 
-export function bits<TFields extends BitsFields>(fields: TFields): BitsSchema<TFields> {
+export function bits<Fields extends BitsFields>(fields: Fields): BitsSchema<Fields> {
   return new BitsSchema(fields);
 }
