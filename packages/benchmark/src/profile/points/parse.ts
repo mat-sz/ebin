@@ -25,6 +25,9 @@ for (let i = 0; i < n; i++) {
   buf.writeUInt16LE(789, i * 6 + 4 + 4);
 }
 
+// Warm up.
+EbinPoints.fromByteArray(buf);
+
 export function run() {
   EbinPoints.fromByteArray(buf);
 }

@@ -28,14 +28,14 @@ export abstract class Schema<T = unknown, TProcessed = T> {
   compile() {
     if (this._writePreprocess) {
       this.toArrayBuffer = (value: T) => {
-        var temp = this._writePreprocess!(value);
-        var buffer = new ArrayBuffer(this.getSize(temp));
+        const temp = this._writePreprocess!(value);
+        const buffer = new ArrayBuffer(this.getSize(temp));
         this.write(EbinContext.fromArrayBuffer(buffer), temp);
         return buffer;
       };
     } else {
       this.toArrayBuffer = (value: T) => {
-        var buffer = new ArrayBuffer(this.getSize(value as unknown as TProcessed));
+        const buffer = new ArrayBuffer(this.getSize(value as unknown as TProcessed));
         this.write(EbinContext.fromArrayBuffer(buffer), value as unknown as TProcessed);
         return buffer;
       };

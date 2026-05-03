@@ -22,6 +22,9 @@ for (let i = 0; i < n; i++) {
   points.push({ x: 123, y: 456, z: 789 });
 }
 
+// Warm up.
+EbinPoints.toByteArray({ points });
+
 export function run() {
   EbinPoints.toByteArray({ points });
 }

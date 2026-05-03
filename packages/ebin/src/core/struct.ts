@@ -71,12 +71,12 @@ class StructSchema<TFields extends StructFields> extends SchemaWithEndianness<St
     const readBuilder = fn('ctx');
 
     if (hasParentDependencies) {
-      readBuilder.line('var obj = {};');
+      readBuilder.line('const obj = {};');
       for (const [key] of fields) {
         readBuilder.line(`obj[${key}] = this.fields[${key}].read(ctx, obj);`);
       }
     } else {
-      readBuilder.line('var obj = {');
+      readBuilder.line('const obj = {');
       for (const [key] of fields) {
         readBuilder.line(`${key}: this.fields[${key}].read(ctx),`);
       }

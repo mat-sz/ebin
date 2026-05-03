@@ -10,6 +10,9 @@ const EbinPoint = e.bits({
 // Prepare input
 const obj = { x: 0b1111, y: 0b00, z: 0b11 };
 
+// Warm up.
+EbinPoint.toByteArray(obj);
+
 export function run() {
   EbinPoint.toByteArray(obj);
 }

@@ -37,6 +37,9 @@ for (let i = 0; i < n; i++) {
   obj.strings.push(randomString());
 }
 
+// Warm up.
+EbinStrings.toByteArray(obj);
+
 export function run() {
   EbinStrings.toByteArray(obj);
 }
